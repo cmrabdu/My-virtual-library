@@ -239,6 +239,16 @@
             background-size: cover;
             background-position: center;
             border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 2rem;
+            background-image: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        .book-cover.has-image {
+            font-size: 0; /* Cache l'emoji quand il y a une vraie image */
         }
 
         .book-info {
@@ -643,7 +653,8 @@
                         title: book.title || '',
                         authors: book.authors || [],
                         pageCount: book.pageCount || 0,
-                        description: book.description || ''
+                        description: book.description || '',
+                        cover: book.imageLinks?.thumbnail?.replace('http:', 'https:') || book.imageLinks?.smallThumbnail?.replace('http:', 'https:') || ''
                     };
                 }
                 return null;
@@ -690,6 +701,11 @@
             document.getElementById('author').value = (bookData.authors && bookData.authors.length > 0) ? bookData.authors[0] : '';
             document.getElementById('pages').value = bookData.pageCount || '';
             document.getElementById('summary').value = bookData.description || '';
+            
+            // Stocker l'URL de la couverture pour l'utiliser lors de l'ajout
+            if (bookData.cover) {
+                document.getElementById('isbn').setAttribute('data-cover-url', bookData.cover);
+            }
         }
 
         // Ajouter un livre
@@ -706,7 +722,7 @@
                 summary: document.getElementById('summary').value.trim(),
                 learnings: document.getElementById('learnings').value.trim(),
                 addedDate: new Date().toLocaleDateString('fr-FR'),
-                cover: null // TODO: Ajouter gestion des couvertures
+                cover: document.getElementById('isbn').getAttribute('data-cover-url') || ''
             };
 
             books.push(book);
@@ -715,6 +731,7 @@
             // Reset form complètement
             e.target.reset();
             document.getElementById('isbn').value = ''; // Vider le champ ISBN aussi
+            document.getElementById('isbn').removeAttribute('data-cover-url'); // Nettoyer la couverture stockée
             document.getElementById('learningsGroup').style.display = 'none';
             
             // Reset du bouton de recherche ISBN
@@ -773,7 +790,9 @@
             
             container.innerHTML = filteredBooks.map(book => `
                 <div class="book-card">
-                    <div class="book-cover" style="background-image: url('${book.cover || ''}')"></div>
+                    <div class="book-cover ${book.cover ? 'has-image' : ''}" style="${book.cover ? `background-image: url('${book.cover}')` : ''}">
+                        ${book.cover ? '' : '📖'}
+                    </div>
                     <div class="book-info">
                         <div class="book-title">${book.title}</div>
                         <div class="book-author">par ${book.author}</div>
