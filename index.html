@@ -2281,6 +2281,14 @@
 
         // Scanner de codes-barres
         let scannerActive = false;
+        
+        // Constantes pour le scanner
+        const SCANNER_CONFIG = {
+            MIN_BARCODE_LENGTH: 10,
+            CLOSE_DELAY_MS: 1500,
+            BEEP_AUDIO_DATA: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYdCSGN2vrGfSkBg',
+            BEEP_VOLUME: 0.3
+        };
 
         function openScanner() {
             const modal = document.getElementById('scannerModal');
@@ -2393,7 +2401,7 @@
             console.log('🎯 Code détecté:', code);
             
             // Valider que c'est un code numérique valide
-            if (!code || code.length < 10) {
+            if (!code || code.length < SCANNER_CONFIG.MIN_BARCODE_LENGTH) {
                 console.log('Code trop court, ignoré');
                 return;
             }
@@ -2407,10 +2415,12 @@
             
             // Son de succès (optionnel)
             try {
-                const beep = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYdCSGN2vrGfSkBg');
-                beep.volume = 0.3;
+                const beep = new Audio(SCANNER_CONFIG.BEEP_AUDIO_DATA);
+                beep.volume = SCANNER_CONFIG.BEEP_VOLUME;
                 beep.play();
-            } catch (e) {}
+            } catch (e) {
+                // Silently fail if audio doesn't work
+            }
             
             // Nettoyer le code (enlever tirets et espaces)
             const cleanCode = code.replace(/[-\s]/g, '');
@@ -2430,7 +2440,7 @@
                 closeScanner();
                 // Lancer automatiquement la recherche
                 searchBookByISBN();
-            }, 1500);
+            }, SCANNER_CONFIG.CLOSE_DELAY_MS);
         }
 
         function isValidISBN(isbn) {
