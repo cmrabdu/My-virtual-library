@@ -516,6 +516,7 @@
         const CONFIG = {
             GOOGLE_BOOKS_API: 'https://www.googleapis.com/books/v1/volumes',
             OPENLIBRARY_API: 'https://openlibrary.org/api/books',
+            OPENLIBRARY_COVERS: 'https://covers.openlibrary.org/b/isbn',
             STORAGE_KEY: 'myLibraryBooks',
             OPENAI_API_KEY: null // À configurer si vous voulez la génération IA
         };
@@ -617,6 +618,12 @@
                     bookData = await searchOpenLibrary(isbn);
                 }
                 
+                // Si on a des données mais pas de couverture, essayer d'en trouver une
+                if (bookData && !bookData.cover) {
+                    console.log('Recherche de couverture supplémentaire...');
+                    bookData.cover = await findBookCover(isbn);
+                }
+                
                 if (bookData) {
                     populateBookForm(bookData);
                     showMessage('✅ Livre trouvé et informations complétées !', 'success');
@@ -682,11 +689,28 @@
                 const bookKey = `ISBN:${isbn}`;
                 if (data[bookKey]) {
                     const book = data[bookKey];
+                    
+                    // Essayer plusieurs tailles de couverture OpenLibrary
+                    let cover = '';
+                    if (book.cover) {
+                        cover = book.cover.large || book.cover.medium || book.cover.small || '';
+                    }
+                    
+                    // Fallback: construire l'URL directement
+                    if (!cover) {
+                        const coverUrl = `${CONFIG.OPENLIBRARY_COVERS}/${isbn}-L.jpg`;
+                        // Vérifier si la couverture existe
+                        if (await checkImageExists(coverUrl)) {
+                            cover = coverUrl;
+                        }
+                    }
+                    
                     return {
                         title: book.title || '',
                         authors: book.authors ? book.authors.map(a => a.name) : [],
                         pageCount: book.number_of_pages || 0,
-                        description: book.subtitle || ''
+                        description: book.subtitle || '',
+                        cover: cover
                     };
                 }
                 return null;
@@ -694,6 +718,77 @@
                 console.log('Erreur OpenLibrary:', error);
                 return null;
             }
+        }
+
+        // Vérifier si une image existe
+        async function checkImageExists(url) {
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                return response.ok && response.headers.get('content-type')?.startsWith('image/');
+            } catch {
+                return false;
+            }
+        }
+
+        // Chercher une couverture dans plusieurs sources
+        async function findBookCover(isbn) {
+            const sources = [
+                // OpenLibrary - différentes tailles
+                `${CONFIG.OPENLIBRARY_COVERS}/${isbn}-L.jpg`,
+                `${CONFIG.OPENLIBRARY_COVERS}/${isbn}-M.jpg`,
+                `${CONFIG.OPENLIBRARY_COVERS}/${isbn}-S.jpg`,
+                // ISBN-10 si c'est un ISBN-13
+                ...(isbn.length === 13 ? [
+                    `${CONFIG.OPENLIBRARY_COVERS}/${convertISBN13to10(isbn)}-L.jpg`,
+                    `${CONFIG.OPENLIBRARY_COVERS}/${convertISBN13to10(isbn)}-M.jpg`
+                ] : []),
+                // ISBN-13 si c'est un ISBN-10  
+                ...(isbn.length === 10 ? [
+                    `${CONFIG.OPENLIBRARY_COVERS}/${convertISBN10to13(isbn)}-L.jpg`,
+                    `${CONFIG.OPENLIBRARY_COVERS}/${convertISBN10to13(isbn)}-M.jpg`
+                ] : [])
+            ];
+            
+            console.log('Recherche de couverture dans:', sources);
+            
+            for (const url of sources) {
+                if (await checkImageExists(url)) {
+                    console.log('Couverture trouvée:', url);
+                    return url;
+                }
+            }
+            
+            return '';
+        }
+
+        // Conversion ISBN-13 vers ISBN-10
+        function convertISBN13to10(isbn13) {
+            if (isbn13.length !== 13 || !isbn13.startsWith('978')) return isbn13;
+            
+            const isbn10base = isbn13.substring(3, 12);
+            let checksum = 0;
+            for (let i = 0; i < 9; i++) {
+                checksum += parseInt(isbn10base[i]) * (10 - i);
+            }
+            const checksumDigit = (11 - (checksum % 11)) % 11;
+            const checkDigit = checksumDigit === 10 ? 'X' : checksumDigit.toString();
+            
+            return isbn10base + checkDigit;
+        }
+
+        // Conversion ISBN-10 vers ISBN-13  
+        function convertISBN10to13(isbn10) {
+            if (isbn10.length !== 10) return isbn10;
+            
+            const isbn13base = '978' + isbn10.substring(0, 9);
+            let checksum = 0;
+            for (let i = 0; i < 12; i++) {
+                const digit = parseInt(isbn13base[i]);
+                checksum += i % 2 === 0 ? digit : digit * 3;
+            }
+            const checkDigit = (10 - (checksum % 10)) % 10;
+            
+            return isbn13base + checkDigit;
         }
 
         function populateBookForm(bookData) {
