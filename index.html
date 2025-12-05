@@ -851,6 +851,44 @@
                 height: 90px;
             }
         }
+
+        /* Version Footer */
+        .version-footer {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #666;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            user-select: none;
+        }
+
+        .version-text {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .version-date {
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .version-footer {
+                position: relative;
+                bottom: auto;
+                right: auto;
+                text-align: center;
+                margin: 20px auto 10px;
+                width: fit-content;
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2463,5 +2501,11 @@
             </div>
         </div>
     </div>
+
+    <!-- Version -->
+    <footer class="version-footer">
+        <span class="version-text">📚 Ma Bibliothèque v0.3.0</span>
+        <span class="version-date">• Décembre 2025</span>
+    </footer>
 </body>
 </html>
