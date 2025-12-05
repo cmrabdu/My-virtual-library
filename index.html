@@ -94,6 +94,132 @@
         .stat-label {
             color: var(--text-secondary);
             margin-top: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* Graphiques statistiques */
+        .stats-charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .pie-chart-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .bar-chart-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .progress-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .progress-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .progress-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .progress-bar-wrapper {
+            width: 100%;
+            height: 30px;
+            background: var(--light-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+            border-radius: 13px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .progress-percentage {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .reading-pace {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 15px;
+            background: var(--light-bg);
+            border-radius: 8px;
+        }
+
+        .pace-item {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .pace-item strong {
+            display: block;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
         }
 
         .main-content {
@@ -445,23 +571,61 @@
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-number" id="totalBooks">0</div>
-                <div class="stat-label">Livres total</div>
+                <div class="stat-label">📚 Livres total</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="readBooks">0</div>
-                <div class="stat-label">Livres lus</div>
+                <div class="stat-label">✅ Livres lus</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="currentlyReading">0</div>
-                <div class="stat-label">En cours</div>
+                <div class="stat-label">📖 En cours</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="toReadBooks">0</div>
-                <div class="stat-label">À lire</div>
+                <div class="stat-label">⏳ À lire</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="averageRating">-</div>
-                <div class="stat-label">Note moyenne</div>
+                <div class="stat-label">⭐ Note moyenne</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalPages">0</div>
+                <div class="stat-label">📄 Pages lues</div>
+            </div>
+        </div>
+
+        <!-- Visualisations statistiques -->
+        <div class="stats-charts">
+            <div class="chart-card">
+                <h3>📊 Distribution des statuts</h3>
+                <div class="pie-chart-container">
+                    <canvas id="statusChart" width="200" height="200"></canvas>
+                    <div class="chart-legend" id="statusLegend"></div>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>⭐ Répartition des notes</h3>
+                <div class="bar-chart-container">
+                    <canvas id="ratingChart" width="300" height="200"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>📈 Progression de lecture</h3>
+                <div class="progress-container">
+                    <div class="progress-stat">
+                        <div class="progress-label">Livres terminés</div>
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar" id="completionProgress" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-percentage" id="completionPercentage">0%</div>
+                    </div>
+                    <div class="reading-pace" id="readingPace">
+                        <div class="pace-item">
+                            <strong id="booksThisMonth">0</strong> livres ce mois
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1133,10 +1297,15 @@
 
         // Statistiques
         function updateStats() {
-            document.getElementById('totalBooks').textContent = books.length;
-            document.getElementById('readBooks').textContent = books.filter(b => b.status === 'read').length;
-            document.getElementById('currentlyReading').textContent = books.filter(b => b.status === 'reading').length;
-            document.getElementById('toReadBooks').textContent = books.filter(b => b.status === 'to-read').length;
+            const totalBooks = books.length;
+            const readBooks = books.filter(b => b.status === 'read').length;
+            const readingBooks = books.filter(b => b.status === 'reading').length;
+            const toReadBooks = books.filter(b => b.status === 'to-read').length;
+            
+            document.getElementById('totalBooks').textContent = totalBooks;
+            document.getElementById('readBooks').textContent = readBooks;
+            document.getElementById('currentlyReading').textContent = readingBooks;
+            document.getElementById('toReadBooks').textContent = toReadBooks;
             
             // Calculer la note moyenne
             const ratedBooks = books.filter(b => b.status === 'read' && b.rating > 0);
@@ -1145,6 +1314,185 @@
                 document.getElementById('averageRating').textContent = `${renderStars(Math.round(average))} (${average.toFixed(1)})`;
             } else {
                 document.getElementById('averageRating').textContent = '-';
+            }
+            
+            // Calculer le total de pages lues
+            const totalPagesRead = books
+                .filter(b => b.status === 'read' && b.pages)
+                .reduce((sum, book) => sum + book.pages, 0);
+            document.getElementById('totalPages').textContent = totalPagesRead.toLocaleString('fr-FR');
+            
+            // Calculer les livres lus ce mois
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            const booksThisMonth = books.filter(b => {
+                if (!b.addedDate || b.status !== 'read') return false;
+                const parts = b.addedDate.split('/');
+                if (parts.length !== 3) return false;
+                const bookMonth = parseInt(parts[1]) - 1; // Mois en JS commence à 0
+                const bookYear = parseInt(parts[2]);
+                return bookMonth === currentMonth && bookYear === currentYear;
+            }).length;
+            document.getElementById('booksThisMonth').textContent = booksThisMonth;
+            
+            // Mettre à jour les graphiques
+            updateCharts();
+        }
+        
+        // Dessiner les graphiques
+        function updateCharts() {
+            drawStatusPieChart();
+            drawRatingBarChart();
+            updateProgressBar();
+        }
+        
+        // Graphique circulaire des statuts
+        function drawStatusPieChart() {
+            const canvas = document.getElementById('statusChart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 80;
+            
+            const readCount = books.filter(b => b.status === 'read').length;
+            const readingCount = books.filter(b => b.status === 'reading').length;
+            const toReadCount = books.filter(b => b.status === 'to-read').length;
+            const total = books.length;
+            
+            if (total === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#475569';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Aucun livre', centerX, centerY);
+                document.getElementById('statusLegend').innerHTML = '';
+                return;
+            }
+            
+            const data = [
+                { label: 'Lus', count: readCount, color: '#16a34a' },
+                { label: 'En cours', count: readingCount, color: '#2563eb' },
+                { label: 'À lire', count: toReadCount, color: '#d97706' }
+            ];
+            
+            // Nettoyer le canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Dessiner le graphique circulaire
+            let currentAngle = -Math.PI / 2; // Commencer en haut
+            
+            data.forEach(item => {
+                if (item.count === 0) return;
+                
+                const sliceAngle = (item.count / total) * 2 * Math.PI;
+                
+                // Dessiner la part
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+                ctx.closePath();
+                ctx.fillStyle = item.color;
+                ctx.fill();
+                
+                // Bordure blanche entre les parts
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                currentAngle += sliceAngle;
+            });
+            
+            // Créer la légende
+            const legend = document.getElementById('statusLegend');
+            legend.innerHTML = data.map(item => `
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: ${item.color}"></div>
+                    <span>${item.label}: ${item.count} (${total > 0 ? Math.round(item.count / total * 100) : 0}%)</span>
+                </div>
+            `).join('');
+        }
+        
+        // Graphique en barres des notes
+        function drawRatingBarChart() {
+            const canvas = document.getElementById('ratingChart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = 40;
+            const barWidth = (width - padding * 2) / 5;
+            const maxHeight = height - padding * 2;
+            
+            // Compter les livres par note
+            const ratingCounts = [0, 0, 0, 0, 0];
+            books.filter(b => b.status === 'read' && b.rating > 0).forEach(book => {
+                if (book.rating >= 1 && book.rating <= 5) {
+                    ratingCounts[book.rating - 1]++;
+                }
+            });
+            
+            const maxCount = Math.max(...ratingCounts, 1);
+            
+            // Nettoyer le canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Dessiner les barres
+            ratingCounts.forEach((count, index) => {
+                const barHeight = (count / maxCount) * maxHeight;
+                const x = padding + index * barWidth;
+                const y = height - padding - barHeight;
+                
+                // Barre avec gradient
+                const gradient = ctx.createLinearGradient(x, y, x, height - padding);
+                gradient.addColorStop(0, '#fbbf24');
+                gradient.addColorStop(1, '#f59e0b');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x + 5, y, barWidth - 10, barHeight);
+                
+                // Bordure
+                ctx.strokeStyle = '#d97706';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x + 5, y, barWidth - 10, barHeight);
+                
+                // Valeur au-dessus de la barre
+                if (count > 0) {
+                    ctx.fillStyle = '#1e293b';
+                    ctx.font = 'bold 14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(count, x + barWidth / 2, y - 5);
+                }
+                
+                // Label (étoiles)
+                ctx.fillStyle = '#475569';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('★'.repeat(index + 1), x + barWidth / 2, height - padding + 20);
+            });
+            
+            // Titre des axes
+            ctx.fillStyle = '#475569';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Nombre de livres', padding / 2, padding);
+        }
+        
+        // Barre de progression
+        function updateProgressBar() {
+            const total = books.length;
+            const read = books.filter(b => b.status === 'read').length;
+            const percentage = total > 0 ? Math.round((read / total) * 100) : 0;
+            
+            const progressBar = document.getElementById('completionProgress');
+            const progressText = document.getElementById('completionPercentage');
+            
+            if (progressBar && progressText) {
+                progressBar.style.width = `${percentage}%`;
+                progressText.textContent = `${percentage}%`;
             }
         }
 
