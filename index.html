@@ -226,6 +226,236 @@
             color: #fbbf24;
         }
 
+        /* Statistiques détaillées */
+        .detailed-stats {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .charts-container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .chart-card {
+            background: var(--light-bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .chart-card h3 {
+            margin: 0 0 15px 0;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .chart-card canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Objectif annuel modernisé */
+        .progress-container {
+            padding: 25px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .progress-emoji {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+
+        .progress-info {
+            flex: 1;
+        }
+
+        .progress-main {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .progress-sub {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-percent {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            background: rgba(59, 130, 246, 0.1);
+            padding: 8px 12px;
+            border-radius: 12px;
+        }
+
+        .progress-bar-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: visible;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), #60a5fa);
+            border-radius: 6px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .progress-shine {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255,255,255,0.4) 40%, 
+                rgba(255,255,255,0.6) 50%, 
+                rgba(255,255,255,0.4) 60%, 
+                transparent 100%);
+            border-radius: 6px;
+            animation: shine 2s ease-in-out infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        .progress-markers {
+            position: absolute;
+            top: -5px;
+            left: 0;
+            right: 0;
+            height: 22px;
+        }
+
+        .milestone {
+            position: absolute;
+            transform: translateX(-50%);
+        }
+
+        .milestone-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            border: 2px solid white;
+            margin: 0 auto 4px;
+            transition: all 0.3s ease;
+        }
+
+        .milestone.reached .milestone-dot {
+            background: #22c55e;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+        }
+
+        .milestone-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: white;
+            padding: 12px 8px;
+            border-radius: 10px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Animation d'accomplissement */
+        .progress-fill.completed {
+            animation: celebrate 1s ease-in-out;
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .stats-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+
         .books-section {
             background: var(--card-bg);
             padding: 30px;
@@ -465,6 +695,43 @@
             </div>
         </div>
 
+        <!-- Section Statistiques détaillées -->
+        <div class="detailed-stats" id="detailedStats">
+            <div class="stats-header">
+                <h2>📊 Statistiques détaillées</h2>
+                <button id="toggleStats" class="btn btn-secondary">👁️ Afficher les graphiques</button>
+            </div>
+            
+            <div class="charts-container" id="chartsContainer" style="display: none;">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>📚 Répartition des livres</h3>
+                        <canvas id="statusChart" width="300" height="300"></canvas>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3>⭐ Distribution des notes</h3>
+                        <canvas id="ratingChart" width="300" height="200"></canvas>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3>📈 Évolution mensuelle</h3>
+                        <canvas id="evolutionChart" width="300" height="200"></canvas>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3>🎯 Objectif annuel</h3>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="yearlyProgress"></div>
+                            </div>
+                            <div class="progress-text" id="progressText">0 / 24 livres cette année</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="main-content">
             <!-- Section Ajouter un livre -->
             <div class="add-book-section">
@@ -639,6 +906,9 @@
             
             // Gestion des étoiles
             setupStarRating();
+            
+            // Toggle des statistiques détaillées
+            document.getElementById('toggleStats').addEventListener('click', toggleDetailedStats);
         }
 
         // Gestion du localStorage
@@ -1131,6 +1401,593 @@
             }
         }
 
+        // Helper pour roundRect (compatibilité)
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+
+        // Toggle statistiques détaillées
+        function toggleDetailedStats() {
+            const container = document.getElementById('chartsContainer');
+            const button = document.getElementById('toggleStats');
+            
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                button.textContent = '👁️ Masquer les graphiques';
+                updateCharts();
+            } else {
+                container.style.display = 'none';
+                button.textContent = '👁️ Afficher les graphiques';
+            }
+        }
+
+        // Mettre à jour tous les graphiques
+        function updateCharts() {
+            drawStatusChart();
+            drawRatingChart();
+            drawEvolutionChart();
+            updateYearlyProgress();
+        }
+
+        // Graphique en camembert - Répartition des statuts
+        function drawStatusChart() {
+            const canvas = document.getElementById('statusChart');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) - 40;
+
+            // Données
+            const toRead = books.filter(b => b.status === 'to-read').length;
+            const reading = books.filter(b => b.status === 'reading').length;
+            const read = books.filter(b => b.status === 'read').length;
+            const total = books.length;
+
+            if (total === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // État vide élégant
+                ctx.fillStyle = '#f1f5f9';
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius - 20, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('📚', centerX, centerY - 10);
+                ctx.font = '12px Arial';
+                ctx.fillText('Aucun livre', centerX, centerY + 15);
+                return;
+            }
+
+            // Couleurs
+            const colors = ['#fbbf24', '#3b82f6', '#10b981'];
+            const labels = ['À lire', 'En cours', 'Lus'];
+            const values = [toRead, reading, read];
+
+            // Dessiner le camembert avec anti-aliasing
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Ombre portée douce
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+            
+            let currentAngle = -Math.PI / 2; // Commencer en haut
+
+            values.forEach((value, index) => {
+                if (value > 0) {
+                    const sliceAngle = (value / total) * 2 * Math.PI;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+                    ctx.closePath();
+                    ctx.fillStyle = colors[index];
+                    ctx.fill();
+                    
+                    // Bordure blanche plus fine
+                    ctx.shadowColor = 'transparent';
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+
+                    currentAngle += sliceAngle;
+                }
+            });
+            
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+
+            // Étiquettes intégrées dans le camembert
+            currentAngle = -Math.PI / 2; // Même point de départ
+            values.forEach((value, index) => {
+                if (value > 0) {
+                    const sliceAngle = (value / total) * 2 * Math.PI;
+                    const middleAngle = currentAngle + sliceAngle / 2;
+                    
+                    // Position de l'étiquette (à l'extérieur du cercle)
+                    const labelRadius = radius + 25;
+                    const labelX = centerX + Math.cos(middleAngle) * labelRadius;
+                    const labelY = centerY + Math.sin(middleAngle) * labelRadius;
+                    
+                    // Ligne de liaison plus élégante
+                    const lineStart = radius + 5;
+                    const lineEnd = radius + 20;
+                    
+                    ctx.strokeStyle = colors[index];
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(centerX + Math.cos(middleAngle) * lineStart, centerY + Math.sin(middleAngle) * lineStart);
+                    ctx.lineTo(centerX + Math.cos(middleAngle) * lineEnd, centerY + Math.sin(middleAngle) * lineEnd);
+                    ctx.stroke();
+                    
+                    // Étiquette avec fond arrondi
+                    const text = `${labels[index]} (${value})`;
+                    ctx.font = 'bold 10px Arial';
+                    
+                    // Alignement intelligent
+                    const isLeft = middleAngle > Math.PI/2 && middleAngle < 3*Math.PI/2;
+                    ctx.textAlign = isLeft ? 'right' : 'left';
+                    
+                    // Fond arrondi pour l'étiquette
+                    const textWidth = ctx.measureText(text).width;
+                    const textHeight = 14;
+                    const padding = 4;
+                    const bgX = isLeft ? labelX - textWidth - padding : labelX - padding;
+                    const bgY = labelY - textHeight/2 - padding/2;
+                    
+                    // Fond avec bordure arrondie
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                    ctx.beginPath();
+                    ctx.roundRect(bgX, bgY, textWidth + padding*2, textHeight + padding, 6);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = colors[index];
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    
+                    // Texte
+                    ctx.fillStyle = colors[index];
+                    ctx.fillText(text, labelX, labelY + 3);
+                    
+                    currentAngle += sliceAngle;
+                }
+            });
+        }
+
+        // Graphique en barres - Distribution des notes
+        function drawRatingChart() {
+            const canvas = document.getElementById('ratingChart');
+            const ctx = canvas.getContext('2d');
+            const ratedBooks = books.filter(b => b.rating > 0);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (ratedBooks.length === 0) {
+                // État vide élégant
+                ctx.fillStyle = '#f1f5f9';
+                ctx.beginPath();
+                ctx.roundRect(canvas.width/2 - 60, canvas.height/2 - 25, 120, 50, 10);
+                ctx.fill();
+                
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('⭐', canvas.width / 2, canvas.height / 2 - 5);
+                ctx.font = '11px Arial';
+                ctx.fillText('Aucune note attribuée', canvas.width / 2, canvas.height / 2 + 12);
+                return;
+            }
+
+            // Compter les notes
+            const ratingCounts = [0, 0, 0, 0, 0];
+            ratedBooks.forEach(book => {
+                if (book.rating >= 1 && book.rating <= 5) {
+                    ratingCounts[book.rating - 1]++;
+                }
+            });
+
+            // Version simple et épurée
+            const maxCount = Math.max(...ratingCounts) || 1;
+            const spacing = canvas.width / 6;
+            const maxBarHeight = canvas.height - 80;
+
+            ratingCounts.forEach((count, index) => {
+                const x = spacing + index * spacing;
+                const barHeight = count > 0 ? Math.max((count / maxCount) * maxBarHeight, 8) : 0;
+                const y = canvas.height - 50 - barHeight;
+
+                // Ombre portée pour le cercle
+                if (count > 0) {
+                    ctx.shadowColor = 'rgba(59, 130, 246, 0.3)';
+                    ctx.shadowBlur = 6;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 2;
+                }
+
+                // Cercle de fond avec dégradé
+                const gradient = ctx.createRadialGradient(x, canvas.height - 30, 0, x, canvas.height - 30, 18);
+                if (count > 0) {
+                    gradient.addColorStop(0, '#60a5fa');
+                    gradient.addColorStop(1, '#3b82f6');
+                } else {
+                    gradient.addColorStop(0, '#f1f5f9');
+                    gradient.addColorStop(1, '#e2e8f0');
+                }
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(x, canvas.height - 30, 18, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Reset shadow
+                ctx.shadowColor = 'transparent';
+
+                // Bordure du cercle
+                ctx.strokeStyle = count > 0 ? '#1e40af' : '#cbd5e1';
+                ctx.lineWidth = count > 0 ? 2 : 1;
+                ctx.stroke();
+
+                // Étoile dans le cercle
+                ctx.fillStyle = count > 0 ? '#ffffff' : '#94a3b8';
+                ctx.font = 'bold 15px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('★', x, canvas.height - 25);
+
+                // Nombre de livres avec fond si > 0
+                if (count > 0) {
+                    // Fond pour le nombre
+                    const text = count.toString();
+                    const textWidth = ctx.measureText(text).width;
+                    
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                    ctx.beginPath();
+                    ctx.roundRect(x - textWidth/2 - 6, y - 20, textWidth + 12, 18, 9);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#3b82f6';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    
+                    // Nombre
+                    ctx.fillStyle = '#1e40af';
+                    ctx.font = 'bold 14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(text, x, y - 8);
+                    
+                    // Ligne de liaison élégante
+                    ctx.strokeStyle = 'rgba(59, 130, 246, 0.4)';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([3, 2]);
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - 2);
+                    ctx.lineTo(x, canvas.height - 48);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+
+                // Label de la note sous l'étoile
+                ctx.fillStyle = '#64748b';
+                ctx.font = 'bold 10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText((index + 1).toString(), x, canvas.height - 8);
+            });
+        }
+
+        // Graphique linéaire - Évolution mensuelle  
+        function drawEvolutionChart() {
+            const canvas = document.getElementById('evolutionChart');
+            const ctx = canvas.getContext('2d');
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (books.length === 0) {
+                // État vide avec style
+                ctx.fillStyle = '#f8fafc';
+                ctx.fillRect(canvas.width/2 - 70, canvas.height/2 - 20, 140, 40);
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(canvas.width/2 - 70, canvas.height/2 - 20, 140, 40);
+                
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('📈', canvas.width / 2, canvas.height / 2 - 2);
+                ctx.font = '11px Arial';
+                ctx.fillText('Aucune donnée', canvas.width / 2, canvas.height / 2 + 12);
+                return;
+            }
+
+            // Calculer les données par mois (6 derniers mois)
+            const monthlyData = {};
+            const now = new Date();
+            
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const key = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+                monthlyData[key] = 0;
+            }
+
+            books.forEach(book => {
+                const [day, month, year] = book.addedDate.split('/');
+                const key = `${year}-${month}`;
+                if (monthlyData.hasOwnProperty(key)) {
+                    monthlyData[key]++;
+                }
+            });
+
+            const months = Object.keys(monthlyData);
+            const values = Object.values(monthlyData);
+            const maxValue = Math.max(...values) || 1;
+
+            // Design moderne sans axes visibles
+            const chartArea = {
+                left: 50,
+                right: canvas.width - 30,
+                top: 30,
+                bottom: canvas.height - 50
+            };
+
+            // Grille discrète en arrière-plan
+            const steps = Math.min(maxValue, 4);
+            for (let i = 0; i <= steps; i++) {
+                const value = Math.round((maxValue / steps) * i);
+                const y = chartArea.bottom - (i / steps * (chartArea.bottom - chartArea.top));
+                
+                // Lignes de grille très subtiles
+                if (i > 0) {
+                    ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)';
+                    ctx.setLineDash([3, 3]);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(chartArea.left, y);
+                    ctx.lineTo(chartArea.right, y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+                
+                // Labels Y élégants
+                if (value > 0) {
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = 'bold 11px Arial';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(value.toString(), chartArea.left - 10, y + 3);
+                }
+            }
+
+            // Zone sous la courbe (gradient)
+            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.05)');
+
+            ctx.beginPath();
+            values.forEach((value, index) => {
+                const x = chartArea.left + (index * (chartArea.right - chartArea.left) / (months.length - 1));
+                const y = chartArea.bottom - (value / maxValue * (chartArea.bottom - chartArea.top));
+                
+                if (index === 0) {
+                    ctx.moveTo(x, chartArea.bottom);
+                    ctx.lineTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.lineTo(chartArea.right, chartArea.bottom);
+            ctx.closePath();
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Courbe principale avec effet de brillance
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+
+            values.forEach((value, index) => {
+                const x = chartArea.left + (index * (chartArea.right - chartArea.left) / (months.length - 1));
+                const y = chartArea.bottom - (value / maxValue * (chartArea.bottom - chartArea.top));
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+
+            ctx.stroke();
+
+            // Points avec effet moderne
+            values.forEach((value, index) => {
+                const x = chartArea.left + (index * (chartArea.right - chartArea.left) / (months.length - 1));
+                const y = chartArea.bottom - (value / maxValue * (chartArea.bottom - chartArea.top));
+                
+                // Halo du point
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Point principal
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Bordure du point
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.stroke();
+
+                // Valeur au-dessus du point si > 0
+                if (value > 0) {
+                    ctx.fillStyle = '#374151';
+                    ctx.font = 'bold 11px Arial';
+                    ctx.textAlign = 'center';
+                    
+                    // Fond blanc pour le nombre
+                    const text = value.toString();
+                    const textWidth = ctx.measureText(text).width;
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                    ctx.fillRect(x - textWidth/2 - 3, y - 20, textWidth + 6, 16);
+                    ctx.strokeStyle = '#e2e8f0';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(x - textWidth/2 - 3, y - 20, textWidth + 6, 16);
+                    
+                    ctx.fillStyle = '#374151';
+                    ctx.fillText(text, x, y - 8);
+                }
+            });
+
+            // Labels des mois avec style moderne
+            ctx.fillStyle = '#64748b';
+            ctx.font = 'bold 10px Arial';
+            ctx.textAlign = 'center';
+            const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+            
+            months.forEach((month, index) => {
+                const x = chartArea.left + (index * (chartArea.right - chartArea.left) / (months.length - 1));
+                const monthNum = parseInt(month.split('-')[1]) - 1;
+                const monthLabel = monthNames[monthNum] || month.split('-')[1];
+                
+                // Petite ligne verticale
+                ctx.strokeStyle = 'rgba(148, 163, 184, 0.5)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x, chartArea.bottom);
+                ctx.lineTo(x, chartArea.bottom + 5);
+                ctx.stroke();
+                
+                ctx.fillText(monthLabel, x, chartArea.bottom + 18);
+            });
+        }
+
+        // Objectif annuel avec design moderne
+        function updateYearlyProgress() {
+            const currentYear = new Date().getFullYear();
+            const booksThisYear = books.filter(book => {
+                const bookYear = parseInt(book.addedDate.split('/')[2]);
+                return bookYear === currentYear;
+            }).length;
+
+            const target = 24; // Objectif par défaut
+            const percentage = Math.min((booksThisYear / target) * 100, 100);
+            const isCompleted = percentage >= 100;
+
+            // Animation de la barre
+            const progressBar = document.getElementById('yearlyProgress');
+            progressBar.style.width = `${percentage}%`;
+            
+            // Couleur dynamique selon le progrès
+            if (percentage >= 100) {
+                progressBar.style.background = 'linear-gradient(90deg, #16a34a, #22c55e)';
+                progressBar.classList.add('completed');
+            } else if (percentage >= 75) {
+                progressBar.style.background = 'linear-gradient(90deg, #eab308, #facc15)';
+            } else if (percentage >= 50) {
+                progressBar.style.background = 'linear-gradient(90deg, #f97316, #fb923c)';
+            } else {
+                progressBar.style.background = 'linear-gradient(90deg, #3b82f6, #60a5fa)';
+            }
+
+            // Texte avec émojis et encouragement
+            let encouragement = '';
+            let emoji = '';
+            
+            if (percentage >= 100) {
+                encouragement = 'Objectif atteint ! 🎉';
+                emoji = '🏆';
+            } else if (percentage >= 75) {
+                encouragement = 'Excellent progrès !';
+                emoji = '🔥';
+            } else if (percentage >= 50) {
+                encouragement = 'À mi-chemin !';
+                emoji = '📚';
+            } else if (percentage >= 25) {
+                encouragement = 'Bon début !';
+                emoji = '🌱';
+            } else {
+                encouragement = 'Continuez !';
+                emoji = '💪';
+            }
+
+            const progressContainer = document.querySelector('.progress-container');
+            progressContainer.innerHTML = `
+                <div class="progress-header">
+                    <span class="progress-emoji">${emoji}</span>
+                    <div class="progress-info">
+                        <div class="progress-main">${booksThisYear} / ${target} livres</div>
+                        <div class="progress-sub">${encouragement}</div>
+                    </div>
+                    <div class="progress-percent">${Math.round(percentage)}%</div>
+                </div>
+                
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="yearlyProgress" style="width: ${percentage}%">
+                            <div class="progress-shine"></div>
+                        </div>
+                    </div>
+                    <div class="progress-markers">
+                        ${Array.from({length: 4}, (_, i) => {
+                            const milestone = (i + 1) * (target / 4);
+                            const reached = booksThisYear >= milestone;
+                            return `<div class="milestone ${reached ? 'reached' : ''}" style="left: ${(milestone / target) * 100}%">
+                                <div class="milestone-dot"></div>
+                                <div class="milestone-label">${milestone}</div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>
+                
+                <div class="progress-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">${Math.max(0, target - booksThisYear)}</span>
+                        <span class="stat-label">Restants</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${booksThisYear > 0 ? Math.round(365 / booksThisYear * (target - booksThisYear)) : '∞'}</span>
+                        <span class="stat-label">Jours restants</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${new Date().getMonth() + 1}/12</span>
+                        <span class="stat-label">Mois écoulés</span>
+                    </div>
+                </div>
+            `;
+
+            // Re-appliquer les styles de couleur
+            const newProgressBar = document.getElementById('yearlyProgress');
+            if (percentage >= 100) {
+                newProgressBar.style.background = 'linear-gradient(90deg, #16a34a, #22c55e)';
+            } else if (percentage >= 75) {
+                newProgressBar.style.background = 'linear-gradient(90deg, #eab308, #facc15)';
+            } else if (percentage >= 50) {
+                newProgressBar.style.background = 'linear-gradient(90deg, #f97316, #fb923c)';
+            } else {
+                newProgressBar.style.background = 'linear-gradient(90deg, #3b82f6, #60a5fa)';
+            }
+        }
+
         // Statistiques
         function updateStats() {
             document.getElementById('totalBooks').textContent = books.length;
@@ -1145,6 +2002,12 @@
                 document.getElementById('averageRating').textContent = `${renderStars(Math.round(average))} (${average.toFixed(1)})`;
             } else {
                 document.getElementById('averageRating').textContent = '-';
+            }
+            
+            // Mettre à jour les graphiques si ils sont visibles
+            const chartsContainer = document.getElementById('chartsContainer');
+            if (chartsContainer && chartsContainer.style.display !== 'none') {
+                updateCharts();
             }
         }
 
