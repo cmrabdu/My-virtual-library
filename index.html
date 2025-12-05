@@ -2324,7 +2324,7 @@
         }
 
         function initQuagga() {
-            console.log("🚀 Initialisation Quagga simplifiée...");
+            alert("ETAPE 1: Debut initialisation scanner");
             
             Quagga.init({
                 inputStream: {
@@ -2349,12 +2349,12 @@
                 locate: true
             }, (err) => {
                 if (err) {
-                    console.error('Erreur Quagga:', err);
-                    showMessage('❌ Erreur d\'initialisation du scanner: ' + err.message, 'error');
+                    alert("ERREUR: " + err.message);
+                    showMessage('Erreur scanner: ' + err.message, 'error');
                     return;
                 }
                 
-                console.log("✅ Scanner initialisé avec succès");
+                alert("ETAPE 2: Scanner pret, camera active");
                 Quagga.start();
                 scannerActive = true;
                 
@@ -2374,8 +2374,7 @@
 
         function onBarcodeDetected(result) {
             const code = result.codeResult.code;
-            console.log('🎯🎯🎯 CODE DÉTECTÉ:', code);
-            console.log('📊 Résultat complet:', result);
+            alert("SUCCES: Code detecte = " + code);
             
             // Feedback visuel immédiat
             try {
