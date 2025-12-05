@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#2563eb">
     <link rel="apple-touch-icon" href="icon-192.png">
     <!-- Bibliothèque pour scan de codes-barres -->
-    <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -2264,117 +2264,65 @@
             showMessage('📤 Bibliothèque exportée !', 'success');
         }
 
-        // Scanner de codes-barres
-        let scannerActive = false;
+        // Scanner de codes-barres - Version simplifiée
+        let html5QrcodeScanner = null;
 
         function openScanner() {
             const modal = document.getElementById('scannerModal');
             modal.style.display = 'flex';
-            startCamera();
+            setTimeout(initQuagga, 500); // Petit délai pour l'affichage
         }
 
         function closeScanner() {
             const modal = document.getElementById('scannerModal');
             modal.style.display = 'none';
-            stopCamera();
-        }
-
-        async function startCamera() {
-            if (scannerActive) return;
             
-            try {
-                const video = document.getElementById('videoElement');
-                
-                // Demander l'accès à la caméra
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: 'environment', // Caméra arrière sur mobile
-                        width: { ideal: 640 },
-                        height: { ideal: 480 }
-                    }
-                });
-                
-                video.srcObject = stream;
-                video.play();
-                
-                // Attendre que la vidéo soit prête
-                video.addEventListener('loadedmetadata', () => {
-                    initQuagga();
-                });
-                
-            } catch (error) {
-                console.error('Erreur caméra:', error);
-                showMessage('❌ Impossible d\'accéder à la caméra. Vérifiez les permissions.', 'error');
-                closeScanner();
-            }
-        }
-
-        function stopCamera() {
-            if (scannerActive) {
-                Quagga.stop();
-                scannerActive = false;
-            }
-            
-            const video = document.getElementById('videoElement');
-            const stream = video.srcObject;
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                video.srcObject = null;
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+                html5QrcodeScanner = null;
             }
         }
 
         function initQuagga() {
-            alert("ETAPE 1: Debut initialisation scanner");
+            if (typeof Html5Qrcode === 'undefined') {
+                showMessage('Erreur: Librairie scanner non chargee', 'error');
+                return;
+            }
             
-            Quagga.init({
-                inputStream: {
-                    name: "Live",
-                    type: "LiveStream",
-                    target: document.querySelector('#scannerVideo'),
-                    constraints: {
-                        width: 640,
-                        height: 480,
-                        facingMode: "environment"
-                    }
-                },
-                decoder: {
-                    readers: ["ean_reader"]
-                },
-                locator: {
-                    patchSize: "medium",
-                    halfSample: true
-                },
-                numOfWorkers: 1,
-                frequency: 10,
-                locate: true
-            }, (err) => {
-                if (err) {
-                    alert("ERREUR: " + err.message);
-                    showMessage('Erreur scanner: ' + err.message, 'error');
-                    return;
+            showMessage('Initialisation scanner...', 'info');
+            
+            const config = {
+                fps: 10,
+                qrbox: { width: 250, height: 100 },
+                aspectRatio: 1.777778,
+                disableFlip: false,
+                videoConstraints: {
+                    facingMode: "environment"
                 }
-                
-                alert("ETAPE 2: Scanner pret, camera active");
-                Quagga.start();
-                scannerActive = true;
-                
-                // Écouter les détections
-                Quagga.onDetected(onBarcodeDetected);
-                
-                // Logs pour debug
-                Quagga.onProcessed((result) => {
-                    if (result && result.boxes) {
-                        console.log("📊 Traitement:", result.boxes.length, "boîtes détectées");
-                    }
-                });
-                
-                showMessage('📷 Scanner actif - Pointez vers un code-barres', 'info');
-            });
+            };
+            
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "scannerVideo", 
+                config,
+                false
+            );
+            
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            showMessage('Scanner pret - Pointez vers un code-barres', 'success');
+        }
+        
+        function onScanSuccess(decodedText, decodedResult) {
+            showMessage('Code detecte: ' + decodedText, 'success');
+            onBarcodeDetected({ codeResult: { code: decodedText } });
+        }
+        
+        function onScanFailure(error) {
+            // Erreurs normales de scan - on ignore
         }
 
         function onBarcodeDetected(result) {
             const code = result.codeResult.code;
-            alert("SUCCES: Code detecte = " + code);
+            showMessage('Code detecte: ' + code, 'success');
             
             // Feedback visuel immédiat
             try {
@@ -2480,7 +2428,7 @@
 
     <!-- Version -->
     <footer class="version-footer">
-        <span class="version-text">📚 Ma Bibliothèque v0.3.2</span>
+        <span class="version-text">📚 Ma Bibliothèque v0.3.3</span>
         <span class="version-date">• Décembre 2025</span>
     </footer>
 </body>
