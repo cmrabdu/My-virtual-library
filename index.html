@@ -9,8 +9,8 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2563eb">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <!-- Bibliothèque pour scan de codes-barres -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <!-- Scanner simple avec capture photo -->
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -1147,6 +1147,7 @@
             document.getElementById('scanBtn').addEventListener('click', openScanner);
             document.getElementById('closeScannerBtn').addEventListener('click', closeScanner);
             document.getElementById('manualEntryBtn').addEventListener('click', closeScanner);
+            document.getElementById('captureBtn').addEventListener('click', captureAndScan);
         }
 
         // Gestion du localStorage
@@ -2264,60 +2265,61 @@
             showMessage('📤 Bibliothèque exportée !', 'success');
         }
 
-        // Scanner de codes-barres - Version simplifiée
-        let html5QrcodeScanner = null;
+        // Scanner simple par capture photo
+        let cameraStream = null;
 
-        function openScanner() {
+        async function openScanner() {
             const modal = document.getElementById('scannerModal');
             modal.style.display = 'flex';
-            setTimeout(initQuagga, 500); // Petit délai pour l'affichage
+            
+            try {
+                const video = document.getElementById('cameraVideo');
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+                video.srcObject = cameraStream;
+                showMessage('Camera active - Pointez vers le code-barres', 'success');
+            } catch (error) {
+                showMessage('Erreur camera: ' + error.message, 'error');
+            }
         }
 
         function closeScanner() {
             const modal = document.getElementById('scannerModal');
             modal.style.display = 'none';
             
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear();
-                html5QrcodeScanner = null;
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
             }
         }
 
-        function initQuagga() {
-            if (typeof Html5Qrcode === 'undefined') {
-                showMessage('Erreur: Librairie scanner non chargee', 'error');
-                return;
-            }
+        async function captureAndScan() {
+            const video = document.getElementById('cameraVideo');
+            const canvas = document.getElementById('captureCanvas');
+            const ctx = canvas.getContext('2d');
             
-            showMessage('Initialisation scanner...', 'info');
+            // Capturer l'image
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
             
-            const config = {
-                fps: 10,
-                qrbox: { width: 250, height: 100 },
-                aspectRatio: 1.777778,
-                disableFlip: false,
-                videoConstraints: {
-                    facingMode: "environment"
+            showMessage('Photo capturee, analyse en cours...', 'info');
+            
+            try {
+                // Utiliser ZXing pour analyser l'image
+                const codeReader = new ZXing.BrowserMultiFormatReader();
+                const result = await codeReader.decodeFromCanvas(canvas);
+                
+                if (result && result.text) {
+                    showMessage('Code detecte: ' + result.text, 'success');
+                    onBarcodeDetected({ codeResult: { code: result.text } });
+                } else {
+                    showMessage('Aucun code-barres detecte. Reessayez.', 'warning');
                 }
-            };
-            
-            html5QrcodeScanner = new Html5QrcodeScanner(
-                "scannerVideo", 
-                config,
-                false
-            );
-            
-            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-            showMessage('Scanner pret - Pointez vers un code-barres', 'success');
-        }
-        
-        function onScanSuccess(decodedText, decodedResult) {
-            showMessage('Code detecte: ' + decodedText, 'success');
-            onBarcodeDetected({ codeResult: { code: decodedText } });
-        }
-        
-        function onScanFailure(error) {
-            // Erreurs normales de scan - on ignore
+            } catch (error) {
+                showMessage('Aucun code trouve. Verifiez la position et reessayez.', 'warning');
+            }
         }
 
         function onBarcodeDetected(result) {
@@ -2397,24 +2399,21 @@
             </div>
             
             <div class="scanner-content">
-                <div id="scannerVideo" class="scanner-video">
-                    <video id="videoElement" autoplay muted playsinline></video>
-                    <canvas id="scannerCanvas" style="display: none;"></canvas>
-                    
-                    <!-- Overlay de scan -->
-                    <div class="scanner-overlay">
-                        <div class="scanner-frame">
-                            <div class="scanner-line"></div>
-                        </div>
-                        <div class="scanner-instructions">
-                            Positionnez le code-barres dans le cadre
-                        </div>
-                    </div>
+                <div class="simple-scanner">
+                    <video id="cameraVideo" autoplay playsinline style="width: 100%; max-height: 400px; border-radius: 12px;"></video>
+                    <canvas id="captureCanvas" style="display: none;"></canvas>
                 </div>
                 
-                <div class="scanner-controls">
-                    <button id="toggleFlashBtn" class="btn btn-secondary">💡 Flash</button>
+                <div class="scanner-controls" style="margin-top: 20px; text-align: center;">
+                    <button id="captureBtn" class="btn" style="font-size: 18px; padding: 15px 30px;">
+                        📸 Capturer le code-barres
+                    </button>
+                    <br><br>
                     <button id="manualEntryBtn" class="btn btn-secondary">⌨️ Saisie manuelle</button>
+                </div>
+                
+                <div style="text-align: center; margin-top: 15px; color: #666; font-size: 14px;">
+                    Pointez la caméra vers le code-barres puis cliquez "Capturer"
                 </div>
                 
                 <div id="scanResult" class="scan-result" style="display: none;">
@@ -2428,7 +2427,7 @@
 
     <!-- Version -->
     <footer class="version-footer">
-        <span class="version-text">📚 Ma Bibliothèque v0.3.3</span>
+        <span class="version-text">📚 Ma Bibliothèque v0.3.4</span>
         <span class="version-date">• Décembre 2025</span>
     </footer>
 </body>
