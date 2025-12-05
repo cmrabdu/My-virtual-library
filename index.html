@@ -9,6 +9,8 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2563eb">
     <link rel="apple-touch-icon" href="icon-192.png">
+    <!-- Bibliothèque pour scan de codes-barres -->
+    <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -442,6 +444,194 @@
             50% { transform: scale(1.02); }
         }
 
+        /* Styles pour le scan ISBN */
+        .isbn-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .isbn-input-group input {
+            flex: 1;
+        }
+
+        .btn-scanner {
+            background: #16a34a;
+            color: white;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-scanner:hover {
+            background: #15803d;
+            transform: translateY(-1px);
+        }
+
+        /* Modal Scanner */
+        .scanner-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .scanner-container {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .scanner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .scanner-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .btn-close {
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scanner-content {
+            padding: 20px;
+        }
+
+        .scanner-video {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #videoElement {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .scanner-frame {
+            position: relative;
+            width: 250px;
+            height: 100px;
+            border: 2px solid #16a34a;
+            border-radius: 8px;
+            background: rgba(22, 163, 74, 0.1);
+        }
+
+        .scanner-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #16a34a;
+            animation: scan 2s ease-in-out infinite;
+            box-shadow: 0 0 10px #16a34a;
+        }
+
+        @keyframes scan {
+            0%, 100% { transform: translateY(-50px); opacity: 0; }
+            50% { transform: translateY(0); opacity: 1; }
+        }
+
+        .scanner-instructions {
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .scanner-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .scan-result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0fdf4;
+            border: 1px solid #16a34a;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-success {
+            color: #15803d;
+            font-weight: 600;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .scanner-container {
+                margin: 10px;
+            }
+            
+            .scanner-frame {
+                width: 200px;
+                height: 80px;
+            }
+            
+            .isbn-input-group {
+                flex-direction: column;
+            }
+            
+            .btn-scanner {
+                width: 100%;
+            }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .charts-grid {
@@ -738,8 +928,13 @@
                 <h2>➕ Ajouter un livre</h2>
                 <form id="bookForm">
                     <div class="form-group">
-                        <label for="isbn">ISBN (optionnel)</label>
-                        <input type="text" id="isbn" placeholder="Entrez l'ISBN pour recherche automatique">
+                        <label for="isbn">ISBN</label>
+                        <div class="isbn-input-group">
+                            <input type="text" id="isbn" placeholder="Entrez l'ISBN ou scannez le code-barres">
+                            <button type="button" id="scanBtn" class="btn btn-scanner">
+                                📷 Scanner
+                            </button>
+                        </div>
                         <button type="button" id="searchBtn" class="btn btn-secondary" style="margin-top: 10px; width: 100%;">
                             <span class="spinner" style="display: none;"></span>
                             🔍 Rechercher par ISBN
@@ -909,6 +1104,11 @@
             
             // Toggle des statistiques détaillées
             document.getElementById('toggleStats').addEventListener('click', toggleDetailedStats);
+            
+            // Scanner de codes-barres
+            document.getElementById('scanBtn').addEventListener('click', openScanner);
+            document.getElementById('closeScannerBtn').addEventListener('click', closeScanner);
+            document.getElementById('manualEntryBtn').addEventListener('click', closeScanner);
         }
 
         // Gestion du localStorage
@@ -2026,6 +2226,144 @@
             showMessage('📤 Bibliothèque exportée !', 'success');
         }
 
+        // Scanner de codes-barres
+        let scannerActive = false;
+
+        function openScanner() {
+            const modal = document.getElementById('scannerModal');
+            modal.style.display = 'flex';
+            startCamera();
+        }
+
+        function closeScanner() {
+            const modal = document.getElementById('scannerModal');
+            modal.style.display = 'none';
+            stopCamera();
+        }
+
+        async function startCamera() {
+            if (scannerActive) return;
+            
+            try {
+                const video = document.getElementById('videoElement');
+                
+                // Demander l'accès à la caméra
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment', // Caméra arrière sur mobile
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    }
+                });
+                
+                video.srcObject = stream;
+                video.play();
+                
+                // Attendre que la vidéo soit prête
+                video.addEventListener('loadedmetadata', () => {
+                    initQuagga();
+                });
+                
+            } catch (error) {
+                console.error('Erreur caméra:', error);
+                showMessage('❌ Impossible d\'accéder à la caméra. Vérifiez les permissions.', 'error');
+                closeScanner();
+            }
+        }
+
+        function stopCamera() {
+            if (scannerActive) {
+                Quagga.stop();
+                scannerActive = false;
+            }
+            
+            const video = document.getElementById('videoElement');
+            const stream = video.srcObject;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+        }
+
+        function initQuagga() {
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#videoElement'),
+                    constraints: {
+                        width: 640,
+                        height: 480,
+                        facingMode: "environment"
+                    }
+                },
+                decoder: {
+                    readers: [
+                        "ean_reader",
+                        "ean_8_reader", 
+                        "code_128_reader",
+                        "code_39_reader"
+                    ]
+                },
+                locator: {
+                    patchSize: "medium",
+                    halfSample: true
+                },
+                numOfWorkers: 2,
+                frequency: 10,
+                locate: true
+            }, (err) => {
+                if (err) {
+                    console.error('Erreur Quagga:', err);
+                    showMessage('❌ Erreur d\'initialisation du scanner', 'error');
+                    return;
+                }
+                
+                console.log("Scanner initialisé");
+                Quagga.start();
+                scannerActive = true;
+                
+                // Écouter les détections
+                Quagga.onDetected(onBarcodeDetected);
+            });
+        }
+
+        function onBarcodeDetected(result) {
+            const code = result.codeResult.code;
+            console.log('Code détecté:', code);
+            
+            // Vérifier que c'est un ISBN valide
+            if (isValidISBN(code)) {
+                document.getElementById('detectedISBN').textContent = code;
+                document.getElementById('scanResult').style.display = 'block';
+                
+                // Attendre un peu puis fermer et remplir
+                setTimeout(() => {
+                    document.getElementById('isbn').value = code;
+                    closeScanner();
+                    // Lancer automatiquement la recherche
+                    searchBookByISBN();
+                }, 1500);
+            }
+        }
+
+        function isValidISBN(isbn) {
+            // Nettoyer l'ISBN
+            const cleanISBN = isbn.replace(/[-\s]/g, '');
+            
+            // Vérifier la longueur (10 ou 13 chiffres)
+            if (cleanISBN.length !== 10 && cleanISBN.length !== 13) {
+                return false;
+            }
+            
+            // Vérifier que ce sont bien des chiffres (sauf X pour ISBN-10)
+            const isValid = cleanISBN.length === 10 
+                ? /^[0-9]{9}[0-9X]$/.test(cleanISBN)
+                : /^[0-9]{13}$/.test(cleanISBN);
+                
+            return isValid;
+        }
+
         // Messages
         function showMessage(text, type = 'info') {
             const message = elements.message;
@@ -2038,5 +2376,43 @@
             }, 4000);
         }
     </script>
+
+    <!-- Modal Scanner -->
+    <div id="scannerModal" class="scanner-modal" style="display: none;">
+        <div class="scanner-container">
+            <div class="scanner-header">
+                <h3>📷 Scanner le code-barres</h3>
+                <button id="closeScannerBtn" class="btn-close">✕</button>
+            </div>
+            
+            <div class="scanner-content">
+                <div id="scannerVideo" class="scanner-video">
+                    <video id="videoElement" autoplay muted playsinline></video>
+                    <canvas id="scannerCanvas" style="display: none;"></canvas>
+                    
+                    <!-- Overlay de scan -->
+                    <div class="scanner-overlay">
+                        <div class="scanner-frame">
+                            <div class="scanner-line"></div>
+                        </div>
+                        <div class="scanner-instructions">
+                            Positionnez le code-barres dans le cadre
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="scanner-controls">
+                    <button id="toggleFlashBtn" class="btn btn-secondary">💡 Flash</button>
+                    <button id="manualEntryBtn" class="btn btn-secondary">⌨️ Saisie manuelle</button>
+                </div>
+                
+                <div id="scanResult" class="scan-result" style="display: none;">
+                    <div class="result-success">
+                        ✅ Code-barres détecté : <span id="detectedISBN"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
