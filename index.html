@@ -183,6 +183,49 @@
             background: #15803d;
         }
 
+        /* Système de notation par étoiles */
+        .star-rating {
+            display: flex;
+            gap: 4px;
+            margin: 8px 0;
+        }
+
+        .star {
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            opacity: 0.3;
+        }
+
+        .star:hover {
+            transform: scale(1.2);
+        }
+
+        .star.active {
+            opacity: 1;
+        }
+
+        .star.hover {
+            opacity: 0.7;
+        }
+
+        .rating-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .book-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .book-rating .stars {
+            color: #fbbf24;
+        }
+
         .books-section {
             background: var(--card-bg);
             padding: 30px;
@@ -416,6 +459,10 @@
                 <div class="stat-number" id="toReadBooks">0</div>
                 <div class="stat-label">À lire</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-number" id="averageRating">-</div>
+                <div class="stat-label">Note moyenne</div>
+            </div>
         </div>
 
         <div class="main-content">
@@ -454,6 +501,19 @@
                             <option value="reading">En cours de lecture</option>
                             <option value="read">Lu</option>
                         </select>
+                    </div>
+
+                    <div class="form-group" id="ratingGroup" style="display: none;">
+                        <label for="rating">Note (optionnel)</label>
+                        <div class="star-rating" id="starRating">
+                            <span class="star" data-rating="1">⭐</span>
+                            <span class="star" data-rating="2">⭐</span>
+                            <span class="star" data-rating="3">⭐</span>
+                            <span class="star" data-rating="4">⭐</span>
+                            <span class="star" data-rating="5">⭐</span>
+                        </div>
+                        <input type="hidden" id="rating" value="0">
+                        <small class="rating-text">Cliquez sur les étoiles pour noter</small>
                     </div>
 
                     <div class="form-group">
@@ -562,11 +622,23 @@
             elements.filterStatus.addEventListener('change', filterBooks);
             elements.exportBtn.addEventListener('click', exportLibrary);
             
-            // Montrer le champ apprentissages si statut = "lu"
+            // Montrer les champs apprentissages ET rating si statut = "lu"
             document.getElementById('status').addEventListener('change', function(e) {
                 const learningsGroup = document.getElementById('learningsGroup');
-                learningsGroup.style.display = e.target.value === 'read' ? 'block' : 'none';
+                const ratingGroup = document.getElementById('ratingGroup');
+                const isRead = e.target.value === 'read';
+                
+                learningsGroup.style.display = isRead ? 'block' : 'none';
+                ratingGroup.style.display = isRead ? 'block' : 'none';
+                
+                // Reset rating si on change de statut
+                if (!isRead) {
+                    resetRating();
+                }
             });
+            
+            // Gestion des étoiles
+            setupStarRating();
         }
 
         // Gestion du localStorage
@@ -816,6 +888,7 @@
                 status: document.getElementById('status').value,
                 summary: document.getElementById('summary').value.trim(),
                 learnings: document.getElementById('learnings').value.trim(),
+                rating: parseInt(document.getElementById('rating').value) || 0,
                 addedDate: new Date().toLocaleDateString('fr-FR'),
                 cover: document.getElementById('isbn').getAttribute('data-cover-url') || ''
             };
@@ -828,6 +901,8 @@
             document.getElementById('isbn').value = ''; // Vider le champ ISBN aussi
             document.getElementById('isbn').removeAttribute('data-cover-url'); // Nettoyer la couverture stockée
             document.getElementById('learningsGroup').style.display = 'none';
+            document.getElementById('ratingGroup').style.display = 'none';
+            resetRating();
             
             // Reset du bouton de recherche ISBN
             const searchBtn = elements.searchBtn;
@@ -898,12 +973,14 @@
                         <span class="book-status status-${book.status}">
                             ${getStatusLabel(book.status)}
                         </span>
+                        ${book.status === 'read' ? `<div class="book-rating"><span class="stars">${renderStars(book.rating || 0)}</span> ${book.rating ? `(${book.rating}/5)` : '(Non noté)'}</div>` : ''}
                         ${book.summary ? `<div class="book-summary">${book.summary.substring(0, 120)}${book.summary.length > 120 ? '...' : ''}</div>` : ''}
                         ${book.learnings ? `<div class="book-summary"><strong>💡 Apprentissages:</strong> ${book.learnings.substring(0, 100)}${book.learnings.length > 100 ? '...' : ''}</div>` : ''}
                         <div class="book-actions">
                             <button class="btn btn-small btn-secondary" onclick="editBookStatus(${book.id})">
                                 ✏️ Statut
                             </button>
+                            ${book.status === 'read' ? `<button class="btn btn-small btn-secondary" onclick="editBookRating(${book.id})">⭐ Noter</button>` : ''}
                             <button class="btn btn-small" onclick="viewBookDetails(${book.id})">
                                 👁️ Voir
                             </button>
@@ -941,6 +1018,57 @@
             displayBooks();
         }
 
+        // Système de rating par étoiles
+        function setupStarRating() {
+            const stars = document.querySelectorAll('.star');
+            const ratingInput = document.getElementById('rating');
+            
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.getAttribute('data-rating'));
+                    setRating(rating);
+                });
+                
+                star.addEventListener('mouseenter', function() {
+                    const rating = parseInt(this.getAttribute('data-rating'));
+                    highlightStars(rating, true);
+                });
+            });
+            
+            document.getElementById('starRating').addEventListener('mouseleave', function() {
+                const currentRating = parseInt(ratingInput.value);
+                highlightStars(currentRating, false);
+            });
+        }
+        
+        function setRating(rating) {
+            document.getElementById('rating').value = rating;
+            highlightStars(rating, false);
+        }
+        
+        function resetRating() {
+            document.getElementById('rating').value = 0;
+            highlightStars(0, false);
+        }
+        
+        function highlightStars(rating, isHover) {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                star.classList.remove('active', 'hover');
+                if (index < rating) {
+                    star.classList.add(isHover ? 'hover' : 'active');
+                }
+            });
+        }
+        
+        function renderStars(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                stars += i <= rating ? '★' : '☆';
+            }
+            return stars;
+        }
+
         // Actions sur les livres
         function editBookStatus(bookId) {
             const book = books.find(b => b.id === bookId);
@@ -949,10 +1077,35 @@
             const newStatus = prompt('Nouveau statut:\n1. to-read (À lire)\n2. reading (En cours)\n3. read (Lu)', book.status);
             if (newStatus && ['to-read', 'reading', 'read'].includes(newStatus)) {
                 book.status = newStatus;
+                // Si le statut n'est plus "lu", enlever la note
+                if (newStatus !== 'read') {
+                    book.rating = 0;
+                }
                 saveBooks();
                 updateStats();
                 filterBooks();
                 showMessage('✅ Statut mis à jour', 'success');
+            }
+        }
+
+        function editBookRating(bookId) {
+            const book = books.find(b => b.id === bookId);
+            if (!book || book.status !== 'read') return;
+            
+            const currentRating = book.rating || 0;
+            const newRating = prompt(`Noter "${book.title}" (1-5 étoiles):\nNote actuelle: ${currentRating > 0 ? currentRating + ' étoiles' : 'Aucune'}`, currentRating);
+            
+            if (newRating !== null) {
+                const rating = parseInt(newRating);
+                if (rating >= 0 && rating <= 5) {
+                    book.rating = rating;
+                    saveBooks();
+                    updateStats();
+                    filterBooks();
+                    showMessage(`✅ Note mise à jour: ${rating > 0 ? rating + ' étoiles' : 'Note supprimée'}`, 'success');
+                } else {
+                    showMessage('❌ La note doit être entre 0 et 5', 'error');
+                }
             }
         }
 
@@ -984,6 +1137,15 @@
             document.getElementById('readBooks').textContent = books.filter(b => b.status === 'read').length;
             document.getElementById('currentlyReading').textContent = books.filter(b => b.status === 'reading').length;
             document.getElementById('toReadBooks').textContent = books.filter(b => b.status === 'to-read').length;
+            
+            // Calculer la note moyenne
+            const ratedBooks = books.filter(b => b.status === 'read' && b.rating > 0);
+            if (ratedBooks.length > 0) {
+                const average = ratedBooks.reduce((sum, book) => sum + book.rating, 0) / ratedBooks.length;
+                document.getElementById('averageRating').textContent = `${renderStars(Math.round(average))} (${average.toFixed(1)})`;
+            } else {
+                document.getElementById('averageRating').textContent = '-';
+            }
         }
 
         // Export
