@@ -1333,6 +1333,7 @@
                 if (parts.length !== 3) return false;
                 const bookMonth = parseInt(parts[1]) - 1; // Mois en JS commence à 0
                 const bookYear = parseInt(parts[2]);
+                if (isNaN(bookMonth) || isNaN(bookYear)) return false;
                 return bookMonth === currentMonth && bookYear === currentYear;
             }).length;
             document.getElementById('booksThisMonth').textContent = booksThisMonth;
@@ -1411,12 +1412,19 @@
             const legend = document.getElementById('statusLegend');
             if (!legend) return;
             
-            legend.innerHTML = data.map(item => `
+            legend.innerHTML = data.map(item => {
+                // Échapper les valeurs pour éviter XSS
+                const safeLabel = String(item.label).replace(/[&<>"']/g, (char) => {
+                    const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                    return escapeMap[char];
+                });
+                const percentage = total > 0 ? Math.round(item.count / total * 100) : 0;
+                return `
                 <div class="legend-item">
                     <div class="legend-color" style="background-color: ${item.color}"></div>
-                    <span>${item.label}: ${item.count} (${total > 0 ? Math.round(item.count / total * 100) : 0}%)</span>
+                    <span>${safeLabel}: ${item.count} (${percentage}%)</span>
                 </div>
-            `).join('');
+            `;}).join('');
         }
         
         // Graphique en barres des notes
