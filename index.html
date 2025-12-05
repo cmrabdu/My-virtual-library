@@ -2286,15 +2286,18 @@
         }
 
         function initQuagga() {
+            console.log("Initialisation de Quagga...");
+            
             Quagga.init({
                 inputStream: {
                     name: "Live",
                     type: "LiveStream",
                     target: document.querySelector('#videoElement'),
                     constraints: {
-                        width: 640,
-                        height: 480,
-                        facingMode: "environment"
+                        width: { min: 640 },
+                        height: { min: 480 },
+                        facingMode: "environment",
+                        aspectRatio: { min: 1, max: 2 }
                     }
                 },
                 decoder: {
@@ -2302,40 +2305,77 @@
                         "ean_reader",
                         "ean_8_reader", 
                         "code_128_reader",
-                        "code_39_reader"
-                    ]
+                        "code_39_reader",
+                        "codabar_reader"
+                    ],
+                    debug: {
+                        drawBoundingBox: true,
+                        showFrequency: true,
+                        drawScanline: true,
+                        showPattern: true
+                    }
                 },
                 locator: {
                     patchSize: "medium",
-                    halfSample: true
+                    halfSample: false
                 },
-                numOfWorkers: 2,
+                numOfWorkers: navigator.hardwareConcurrency || 4,
                 frequency: 10,
-                locate: true
+                locate: true,
+                area: { // Zone de détection
+                    top: "20%",
+                    right: "20%", 
+                    left: "20%",
+                    bottom: "20%"
+                }
             }, (err) => {
                 if (err) {
                     console.error('Erreur Quagga:', err);
-                    showMessage('❌ Erreur d\'initialisation du scanner', 'error');
+                    showMessage('❌ Erreur d\'initialisation du scanner: ' + err.message, 'error');
                     return;
                 }
                 
-                console.log("Scanner initialisé");
+                console.log("✅ Scanner initialisé avec succès");
                 Quagga.start();
                 scannerActive = true;
                 
                 // Écouter les détections
                 Quagga.onDetected(onBarcodeDetected);
+                
+                // Logs pour debug
+                Quagga.onProcessed((result) => {
+                    if (result && result.boxes) {
+                        console.log("📊 Traitement:", result.boxes.length, "boîtes détectées");
+                    }
+                });
+                
+                showMessage('📷 Scanner actif - Pointez vers un code-barres', 'info');
             });
         }
 
         function onBarcodeDetected(result) {
             const code = result.codeResult.code;
-            console.log('Code détecté:', code);
+            const confidence = result.codeResult.startInfo.error || 0;
             
-            // Vérifier que c'est un ISBN valide
-            if (isValidISBN(code)) {
+            console.log('🎯 Code détecté:', code, 'Confiance:', confidence);
+            
+            // Feedback visuel immédiat
+            document.querySelector('.scanner-frame').style.borderColor = '#22c55e';
+            document.querySelector('.scanner-frame').style.backgroundColor = 'rgba(34, 197, 94, 0.2)';
+            
+            // Son de succès (optionnel)
+            try {
+                const beep = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYdCSGN2vrGfSkBg');
+                beep.volume = 0.3;
+                beep.play();
+            } catch (e) {}
+            
+            // Vérifier que c'est un ISBN valide (moins strict)
+            if (isValidISBN(code) || code.length >= 10) {
                 document.getElementById('detectedISBN').textContent = code;
                 document.getElementById('scanResult').style.display = 'block';
+                
+                showMessage('✅ Code-barres détecté: ' + code, 'success');
                 
                 // Attendre un peu puis fermer et remplir
                 setTimeout(() => {
@@ -2343,7 +2383,16 @@
                     closeScanner();
                     // Lancer automatiquement la recherche
                     searchBookByISBN();
-                }, 1500);
+                }, 2000);
+            } else {
+                console.log('❌ Code non valide:', code);
+                showMessage('⚠️ Code détecté mais pas un ISBN valide: ' + code, 'warning');
+                
+                // Reset visuel
+                setTimeout(() => {
+                    document.querySelector('.scanner-frame').style.borderColor = '#16a34a';
+                    document.querySelector('.scanner-frame').style.backgroundColor = 'rgba(22, 163, 74, 0.1)';
+                }, 1000);
             }
         }
 
