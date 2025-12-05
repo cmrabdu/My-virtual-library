@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#2563eb">
     <link rel="apple-touch-icon" href="icon-192.png">
     <!-- Bibliothèque pour scan de codes-barres -->
-    <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.4/dist/quagga.min.js"></script>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -2297,6 +2297,14 @@
         async function startCamera() {
             if (scannerActive) return;
             
+            // Vérifier si QuaggaJS est chargé
+            if (typeof Quagga === 'undefined') {
+                showMessage('❌ La bibliothèque de scan n\'est pas chargée. Veuillez recharger la page ou utiliser la saisie manuelle.', 'error');
+                console.error('QuaggaJS n\'est pas chargé - vérifiez que le CDN est accessible');
+                closeScanner();
+                return;
+            }
+            
             try {
                 // QuaggaJS va gérer l'accès à la caméra
                 initQuagga();
@@ -2309,7 +2317,7 @@
         }
 
         function stopCamera() {
-            if (scannerActive) {
+            if (typeof Quagga !== 'undefined' && scannerActive) {
                 Quagga.stop();
                 scannerActive = false;
             }

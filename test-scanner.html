@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Scanner QuaggaJS</title>
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.4/dist/quagga.min.js"></script>
+    <style>
+        #scanner { 
+            width: 640px; 
+            height: 480px; 
+            border: 2px solid green;
+            position: relative;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Scanner de Codes-Barres</h1>
+    <button onclick="startScanner()">Démarrer</button>
+    <button onclick="stopScanner()">Arrêter</button>
+    <div id="scanner"></div>
+    <div id="result">En attente...</div>
+
+    <script>
+        let isScanning = false;
+
+        function startScanner() {
+            if (typeof Quagga === 'undefined') {
+                document.getElementById('result').innerHTML = 'ERREUR: QuaggaJS non chargé!';
+                return;
+            }
+
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#scanner'),
+                    constraints: {
+                        width: 640,
+                        height: 480,
+                        facingMode: "environment"
+                    }
+                },
+                decoder: {
+                    readers: ["ean_reader", "ean_8_reader"]
+                },
+                locator: {
+                    patchSize: "medium",
+                    halfSample: true
+                },
+                numOfWorkers: 2,
+                frequency: 10,
+                locate: true
+            }, function(err) {
+                if (err) {
+                    console.error(err);
+                    document.getElementById('result').innerHTML = 'ERREUR: ' + err.message;
+                    return;
+                }
+                console.log("Initialization finished. Ready to start");
+                Quagga.start();
+                isScanning = true;
+                document.getElementById('result').innerHTML = 'Scanner démarré - pointez vers un code-barres';
+            });
+
+            Quagga.onDetected(function(result) {
+                const code = result.codeResult.code;
+                console.log("Code détecté:", code);
+                document.getElementById('result').innerHTML = '✅ CODE DÉTECTÉ: ' + code;
+            });
+
+            Quagga.onProcessed(function(result) {
+                if (result && result.boxes) {
+                    console.log("Processing...", result.boxes.length, "boxes");
+                }
+            });
+        }
+
+        function stopScanner() {
+            if (isScanning && typeof Quagga !== 'undefined') {
+                Quagga.stop();
+                isScanning = false;
+                document.getElementById('result').innerHTML = 'Scanner arrêté';
+            }
+        }
+    </script>
+</body>
+</html>
