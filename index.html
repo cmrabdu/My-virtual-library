@@ -2324,48 +2324,29 @@
         }
 
         function initQuagga() {
-            console.log("Initialisation de Quagga...");
+            console.log("🚀 Initialisation Quagga simplifiée...");
             
             Quagga.init({
                 inputStream: {
                     name: "Live",
                     type: "LiveStream",
-                    target: document.querySelector('#videoElement'),
+                    target: document.querySelector('#scannerVideo'),
                     constraints: {
-                        width: { min: 640 },
-                        height: { min: 480 },
-                        facingMode: "environment",
-                        aspectRatio: { min: 1, max: 2 }
+                        width: 640,
+                        height: 480,
+                        facingMode: "environment"
                     }
                 },
                 decoder: {
-                    readers: [
-                        "ean_reader",
-                        "ean_8_reader", 
-                        "code_128_reader",
-                        "code_39_reader",
-                        "codabar_reader"
-                    ],
-                    debug: {
-                        drawBoundingBox: true,
-                        showFrequency: true,
-                        drawScanline: true,
-                        showPattern: true
-                    }
+                    readers: ["ean_reader"]
                 },
                 locator: {
                     patchSize: "medium",
-                    halfSample: false
+                    halfSample: true
                 },
-                numOfWorkers: navigator.hardwareConcurrency || 4,
+                numOfWorkers: 1,
                 frequency: 10,
-                locate: true,
-                area: { // Zone de détection
-                    top: "20%",
-                    right: "20%", 
-                    left: "20%",
-                    bottom: "20%"
-                }
+                locate: true
             }, (err) => {
                 if (err) {
                     console.error('Erreur Quagga:', err);
@@ -2393,62 +2374,58 @@
 
         function onBarcodeDetected(result) {
             const code = result.codeResult.code;
-            const confidence = result.codeResult.startInfo.error || 0;
-            
-            console.log('🎯 Code détecté:', code, 'Confiance:', confidence);
+            console.log('🎯🎯🎯 CODE DÉTECTÉ:', code);
+            console.log('📊 Résultat complet:', result);
             
             // Feedback visuel immédiat
-            document.querySelector('.scanner-frame').style.borderColor = '#22c55e';
-            document.querySelector('.scanner-frame').style.backgroundColor = 'rgba(34, 197, 94, 0.2)';
-            
-            // Son de succès (optionnel)
             try {
-                const beep = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYdCSGN2vrGfSkBg');
-                beep.volume = 0.3;
-                beep.play();
-            } catch (e) {}
-            
-            // Vérifier que c'est un ISBN valide (moins strict)
-            if (isValidISBN(code) || code.length >= 10) {
-                document.getElementById('detectedISBN').textContent = code;
-                document.getElementById('scanResult').style.display = 'block';
-                
-                showMessage('✅ Code-barres détecté: ' + code, 'success');
-                
-                // Attendre un peu puis fermer et remplir
-                setTimeout(() => {
-                    document.getElementById('isbn').value = code;
-                    closeScanner();
-                    // Lancer automatiquement la recherche
-                    searchBookByISBN();
-                }, 2000);
-            } else {
-                console.log('❌ Code non valide:', code);
-                showMessage('⚠️ Code détecté mais pas un ISBN valide: ' + code, 'warning');
-                
-                // Reset visuel
-                setTimeout(() => {
-                    document.querySelector('.scanner-frame').style.borderColor = '#16a34a';
-                    document.querySelector('.scanner-frame').style.backgroundColor = 'rgba(22, 163, 74, 0.1)';
-                }, 1000);
+                document.querySelector('.scanner-frame').style.borderColor = '#22c55e';
+                document.querySelector('.scanner-frame').style.backgroundColor = 'rgba(34, 197, 94, 0.2)';
+            } catch (e) {
+                console.log('Erreur style:', e);
             }
+            
+            // Pour debug: accepter TOUS les codes détectés
+            console.log('📝 Tous codes acceptés pour test:', code);
+            
+            // Afficher le résultat
+            const detectedElement = document.getElementById('detectedISBN');
+            const resultElement = document.getElementById('scanResult');
+            
+            if (detectedElement) detectedElement.textContent = code;
+            if (resultElement) resultElement.style.display = 'block';
+            
+            showMessage('✅ Code détecté: ' + code, 'success');
+            
+            // Remplir automatiquement après 2 secondes
+            setTimeout(() => {
+                const isbnField = document.getElementById('isbn');
+                if (isbnField) {
+                    isbnField.value = code;
+                    console.log('✅ Code inséré dans champ ISBN');
+                }
+                closeScanner();
+                
+                // Chercher le livre automatiquement
+                if (typeof searchBookByISBN === 'function') {
+                    searchBookByISBN();
+                }
+            }, 2000);
         }
 
         function isValidISBN(isbn) {
-            // Nettoyer l'ISBN
+            console.log('🔍 Validation ISBN (mode debug):', isbn);
+            
+            // Pour debug: accepter tout code de 10+ caractères
             const cleanISBN = isbn.replace(/[-\s]/g, '');
             
-            // Vérifier la longueur (10 ou 13 chiffres)
-            if (cleanISBN.length !== 10 && cleanISBN.length !== 13) {
-                return false;
+            if (cleanISBN.length >= 10) {
+                console.log('✅ Code accepté (debug mode):', cleanISBN);
+                return true;
             }
             
-            // Vérifier que ce sont bien des chiffres (sauf X pour ISBN-10)
-            const isValid = cleanISBN.length === 10 
-                ? /^[0-9]{9}[0-9X]$/.test(cleanISBN)
-                : /^[0-9]{13}$/.test(cleanISBN);
-                
-            return isValid;
+            console.log('❌ Code trop court:', cleanISBN);
+            return false;
         }
 
         // Messages
