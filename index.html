@@ -1323,6 +1323,7 @@
             document.getElementById('totalPages').textContent = totalPagesRead.toLocaleString('fr-FR');
             
             // Calculer les livres lus ce mois
+            // Note: Basé sur addedDate car readDate n'existe pas encore dans le modèle
             const now = new Date();
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
@@ -1353,6 +1354,7 @@
             if (!canvas) return;
             
             const ctx = canvas.getContext('2d');
+            if (!ctx) return;
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
             const radius = 80;
@@ -1407,6 +1409,8 @@
             
             // Créer la légende
             const legend = document.getElementById('statusLegend');
+            if (!legend) return;
+            
             legend.innerHTML = data.map(item => `
                 <div class="legend-item">
                     <div class="legend-color" style="background-color: ${item.color}"></div>
@@ -1421,6 +1425,7 @@
             if (!canvas) return;
             
             const ctx = canvas.getContext('2d');
+            if (!ctx) return;
             const width = canvas.width;
             const height = canvas.height;
             const padding = 40;
