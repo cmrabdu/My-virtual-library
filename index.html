@@ -148,50 +148,38 @@
             </form>
         </div>
 
-        <!-- PAGE 4: STATISTIQUES -->
-        <div class="page" id="page-stats" style="display: none;">
+        <!-- PAGE 4: RECHERCHER -->
+        <div class="page" id="page-search" style="display: none;">
             <div class="page-header">
-                <h1>📊 Statistiques</h1>
+                <h1>🔍 Rechercher</h1>
             </div>
 
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-number" id="totalBooks2">0</div>
-                    <div class="stat-label">Total</div>
+            <div class="search-section">
+                <div class="search-bar-container">
+                    <input type="text" id="globalSearchInput" placeholder="🔍 Rechercher un livre, un auteur..." class="search-input-large">
+                    <button id="globalSearchBtn" class="btn btn-primary">🔍 Rechercher</button>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="toReadBooks">0</div>
-                    <div class="stat-label">À lire</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="averageRating">-</div>
-                    <div class="stat-label">Note moyenne</div>
-                </div>
-            </div>
 
-            <div class="charts-container">
-                <div class="chart-card">
-                    <h3>📚 Répartition des livres</h3>
-                    <canvas id="statusChart" width="300" height="300"></canvas>
+                <div class="search-filters">
+                    <button class="filter-chip active" data-filter="all">🌎 Tout</button>
+                    <button class="filter-chip" data-filter="books">📚 Livres</button>
+                    <button class="filter-chip" data-filter="authors">✍️ Auteurs</button>
                 </div>
-                
-                <div class="chart-card">
-                    <h3>⭐ Distribution des notes</h3>
-                    <canvas id="ratingChart" width="300" height="200"></canvas>
-                </div>
-                
-                <div class="chart-card">
-                    <h3>📈 Évolution mensuelle</h3>
-                    <canvas id="evolutionChart" width="300" height="200"></canvas>
-                </div>
-                
-                <div class="chart-card">
-                    <h3>🎯 Objectif annuel</h3>
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="yearlyProgress"></div>
+
+                <div id="searchResults" class="search-results">
+                    <div class="search-placeholder">
+                        <div class="search-icon">🔍</div>
+                        <h3>Découvrez de nouveaux livres</h3>
+                        <p>Recherchez par titre, auteur ou ISBN</p>
+                        <div class="search-suggestions">
+                            <p style="color: #64748b; margin-top: 20px; font-size: 14px;">🔥 Suggestions:</p>
+                            <div class="suggestion-chips">
+                                <button class="suggestion-chip" onclick="quickSearch('science fiction')">Science Fiction</button>
+                                <button class="suggestion-chip" onclick="quickSearch('philosophie')">Philosophie</button>
+                                <button class="suggestion-chip" onclick="quickSearch('business')">Business</button>
+                                <button class="suggestion-chip" onclick="quickSearch('histoire')">Histoire</button>
+                            </div>
                         </div>
-                        <div class="progress-text" id="progressText">0 / 24 livres</div>
                     </div>
                 </div>
             </div>
@@ -203,46 +191,104 @@
                 <h1>👤 Profil</h1>
             </div>
 
-            <div class="profile-section">
-                <div class="profile-avatar">
-                    <div class="avatar-circle">📚</div>
-                    <h2 id="userName">Lecteur</h2>
-                    <p class="profile-subtitle">Amateur de livres</p>
+            <!-- Sous-onglets Profil -->
+            <div class="profile-tabs">
+                <button class="profile-tab active" data-tab="settings">⚙️ Paramètres</button>
+                <button class="profile-tab" data-tab="stats">📊 Statistiques</button>
+                <button class="profile-tab" data-tab="data">💾 Données</button>
+            </div>
+
+            <!-- TAB: PARAMÈTRES -->
+            <div class="profile-tab-content" id="tab-settings" style="display: block;">
+                <div class="profile-section">
+                    <div class="profile-avatar">
+                        <div class="avatar-circle">📚</div>
+                        <h2 id="userName">Lecteur</h2>
+                        <p class="profile-subtitle">Amateur de livres</p>
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="profile-stat">
+                            <span class="stat-value" id="profileTotalBooks">0</span>
+                            <span class="stat-name">Livres</span>
+                        </div>
+                        <div class="profile-stat">
+                            <span class="stat-value" id="profileReadBooks">0</span>
+                            <span class="stat-name">Lus</span>
+                        </div>
+                        <div class="profile-stat">
+                            <span class="stat-value" id="profilePages">0</span>
+                            <span class="stat-name">Pages</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>⚙️ Paramètres</h3>
+                        
+                        <div class="setting-item">
+                            <label for="yearlyGoal">Objectif annuel</label>
+                            <input type="number" id="yearlyGoal" value="24" min="1" max="365">
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="userNameInput">Nom d'utilisateur</label>
+                            <input type="text" id="userNameInput" placeholder="Votre nom">
+                        </div>
+
+                        <button id="saveSettings" class="btn btn-primary">💾 Sauvegarder</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: STATISTIQUES -->
+            <div class="profile-tab-content" id="tab-stats" style="display: none;">
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalBooks2">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="toReadBooks">0</div>
+                        <div class="stat-label">À lire</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="averageRating">-</div>
+                        <div class="stat-label">Note moyenne</div>
+                    </div>
                 </div>
 
-                <div class="profile-stats">
-                    <div class="profile-stat">
-                        <span class="stat-value" id="profileTotalBooks">0</span>
-                        <span class="stat-name">Livres</span>
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>📚 Répartition des livres</h3>
+                        <canvas id="statusChart" width="300" height="300"></canvas>
                     </div>
-                    <div class="profile-stat">
-                        <span class="stat-value" id="profileReadBooks">0</span>
-                        <span class="stat-name">Lus</span>
-                    </div>
-                    <div class="profile-stat">
-                        <span class="stat-value" id="profilePages">0</span>
-                        <span class="stat-name">Pages</span>
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <h3>⚙️ Paramètres</h3>
                     
-                    <div class="setting-item">
-                        <label for="yearlyGoal">Objectif annuel</label>
-                        <input type="number" id="yearlyGoal" value="24" min="1" max="365">
+                    <div class="chart-card">
+                        <h3>⭐ Distribution des notes</h3>
+                        <canvas id="ratingChart" width="300" height="200"></canvas>
                     </div>
-
-                    <div class="setting-item">
-                        <label for="userNameInput">Nom d'utilisateur</label>
-                        <input type="text" id="userNameInput" placeholder="Votre nom">
+                    
+                    <div class="chart-card">
+                        <h3>📈 Évolution mensuelle</h3>
+                        <canvas id="evolutionChart" width="300" height="200"></canvas>
                     </div>
-
-                    <button id="saveSettings" class="btn btn-primary">💾 Sauvegarder</button>
+                    
+                    <div class="chart-card">
+                        <h3>🎯 Objectif annuel</h3>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="yearlyProgress"></div>
+                            </div>
+                            <div class="progress-text" id="progressText">0 / 24 livres</div>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
+            <!-- TAB: DONNÉES -->
+            <div class="profile-tab-content" id="tab-data" style="display: none;">
                 <div class="actions-section">
-                    <h3>🔧 Actions</h3>
+                    <h3>🔧 Gestion des données</h3>
                     <button id="exportBtn" class="btn btn-secondary">📤 Exporter ma bibliothèque</button>
                     <button id="importBtn" class="btn btn-secondary">📥 Importer une bibliothèque</button>
                     <input type="file" id="importFile" accept=".json" style="display: none;">
@@ -250,8 +296,8 @@
                 </div>
 
                 <div class="about-section">
-                    <p class="version-info">📚 Ma Bibliothèque v0.5.0</p>
-                    <p class="version-date">Décembre 2025 • Architecture multi-pages</p>
+                    <p class="version-info">📚 Ma Bibliothèque v0.6.0</p>
+                    <p class="version-date">Décembre 2025 • Recherche & Navigation sociale</p>
                 </div>
             </div>
         </div>
@@ -263,18 +309,18 @@
                 <span class="nav-label">Accueil</span>
             </button>
             
-            <button class="nav-item" data-page="library">
-                <span class="nav-icon">📚</span>
-                <span class="nav-label">Bibliothèque</span>
+            <button class="nav-item" data-page="search">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-label">Rechercher</span>
             </button>
             
             <button class="nav-item nav-item-center" data-page="add">
                 <span class="nav-icon-large">➕</span>
             </button>
             
-            <button class="nav-item" data-page="stats">
-                <span class="nav-icon">📊</span>
-                <span class="nav-label">Stats</span>
+            <button class="nav-item" data-page="library">
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">Bibliothèque</span>
             </button>
             
             <button class="nav-item" data-page="profile">

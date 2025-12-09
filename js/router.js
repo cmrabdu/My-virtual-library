@@ -32,9 +32,8 @@ function navigateTo(pageName) {
         case 'library':
             displayBooks();
             break;
-        case 'stats':
-            updateStats();
-            updateCharts();
+        case 'search':
+            // La page recherche est gérée séparément
             break;
         case 'profile':
             updateProfilePage();
@@ -211,4 +210,136 @@ function initRouter() {
             }
         });
     }
+
+    // Gestion des sous-onglets du profil
+    const profileTabs = document.querySelectorAll('.profile-tab');
+    profileTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTab = tab.dataset.tab;
+            
+            // Mettre à jour les onglets actifs
+            profileTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Afficher le bon contenu
+            document.querySelectorAll('.profile-tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            const targetContent = document.getElementById(`tab-${targetTab}`);
+            if (targetContent) {
+                targetContent.style.display = 'block';
+                
+                // Si on ouvre l'onglet stats, mettre à jour les graphiques
+                if (targetTab === 'stats') {
+                    updateStats();
+                    updateCharts();
+                }
+            }
+        });
+    });
+
+    // Initialiser la page de recherche
+    initSearchPage();
+}
+
+function initSearchPage() {
+    const globalSearchBtn = document.getElementById('globalSearchBtn');
+    const globalSearchInput = document.getElementById('globalSearchInput');
+    
+    if (globalSearchBtn && globalSearchInput) {
+        globalSearchBtn.addEventListener('click', () => performGlobalSearch());
+        globalSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performGlobalSearch();
+        });
+    }
+
+    // Gestion des filtres de recherche
+    const filterChips = document.querySelectorAll('.filter-chip');
+    filterChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            filterChips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+        });
+    });
+}
+
+function quickSearch(query) {
+    const searchInput = document.getElementById('globalSearchInput');
+    if (searchInput) {
+        searchInput.value = query;
+        performGlobalSearch();
+    }
+}
+
+function performGlobalSearch() {
+    const query = document.getElementById('globalSearchInput').value.trim();
+    const activeFilter = document.querySelector('.filter-chip.active')?.dataset.filter || 'all';
+    const resultsContainer = document.getElementById('searchResults');
+    
+    if (!query) {
+        showMessage('⚠️ Entrez un terme de recherche', 'warning');
+        return;
+    }
+
+    resultsContainer.innerHTML = '<div class="loading"><div class="spinner"></div>Recherche en cours...</div>';
+
+    // Recherche via Google Books API
+    searchGoogleBooks(query)
+        .then(results => {
+            displaySearchResults(results, resultsContainer);
+        })
+        .catch(error => {
+            resultsContainer.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #64748b;">
+                    <p>❌ Erreur lors de la recherche</p>
+                    <p style="font-size: 14px;">${error.message}</p>
+                </div>
+            `;
+        });
+}
+
+function displaySearchResults(results, container) {
+    if (!results || results.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #64748b;">
+                <p>📭 Aucun résultat trouvé</p>
+                <p style="font-size: 14px;">Essayez avec d'autres mots-clés</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = '<div class="search-results-grid"></div>';
+    const grid = container.querySelector('.search-results-grid');
+
+    results.slice(0, 12).forEach(book => {
+        const resultCard = document.createElement('div');
+        resultCard.className = 'search-result-card';
+        resultCard.innerHTML = `
+            <img src="${book.cover}" alt="${book.title}" class="search-result-cover">
+            <div class="search-result-info">
+                <h4>${book.title}</h4>
+                <p class="search-result-author">${book.author}</p>
+                ${book.pages ? `<p class="search-result-pages">${book.pages} pages</p>` : ''}
+                <button class="btn btn-small btn-primary" onclick="addBookFromSearch('${book.isbn || ''}', '${book.title.replace(/'/g, "\\'")}', '${book.author.replace(/'/g, "\\'")}', '${book.pages || ''}', '${book.cover}')">
+                    ➕ Ajouter
+                </button>
+            </div>
+        `;
+        grid.appendChild(resultCard);
+    });
+}
+
+function addBookFromSearch(isbn, title, author, pages, cover) {
+    // Pré-remplir le formulaire et basculer sur la page d'ajout
+    CONFIG.tempCoverUrl = cover;
+    navigateTo('add');
+    
+    setTimeout(() => {
+        document.getElementById('isbn').value = isbn;
+        document.getElementById('title').value = title;
+        document.getElementById('author').value = author;
+        document.getElementById('pages').value = pages;
+        showMessage('📝 Formulaire pré-rempli, complétez et ajoutez !', 'info');
+    }, 100);
 }

@@ -1,7 +1,7 @@
 {
   "name": "Ma Bibliothèque Intelligente",
   "short_name": "Ma Biblio",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Gérez votre bibliothèque personnelle avec l'IA",
   "start_url": "/",
   "display": "standalone",
