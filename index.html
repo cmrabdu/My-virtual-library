@@ -9,2282 +9,290 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2563eb">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <style>
-        :root {
-            --primary-color: #2563eb;
-            --secondary-color: #64748b;
-            --success-color: #16a34a;
-            --warning-color: #d97706;
-            --danger-color: #dc2626;
-            --light-bg: #f8fafc;
-            --dark-bg: #1e293b;
-            --card-bg: white;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --border-color: #e2e8f0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, var(--light-bg) 0%, #e0e7ff 100%);
-            color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .header p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            margin-top: 5px;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
-            align-items: start;
-        }
-
-        .add-book-section {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.2s ease;
-            background: white;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .btn {
-            background: var(--primary-color);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn:hover {
-            background: #1d4ed8;
-            transform: translateY(-1px);
-        }
-
-        .btn:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-secondary {
-            background: var(--secondary-color);
-        }
-
-        .btn-secondary:hover {
-            background: #475569;
-        }
-
-        .btn-success {
-            background: var(--success-color);
-        }
-
-        .btn-success:hover {
-            background: #15803d;
-        }
-
-        /* Système de notation par étoiles */
-        .star-rating {
-            display: flex;
-            gap: 4px;
-            margin: 8px 0;
-        }
-
-        .star {
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            opacity: 0.3;
-        }
-
-        .star:hover {
-            transform: scale(1.2);
-        }
-
-        .star.active {
-            opacity: 1;
-        }
-
-        .star.hover {
-            opacity: 0.7;
-        }
-
-        .rating-text {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .book-rating {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            margin: 5px 0;
-            font-size: 0.9rem;
-        }
-
-        .book-rating .stars {
-            color: #fbbf24;
-        }
-
-        /* Statistiques détaillées */
-        .detailed-stats {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-        }
-
-        .stats-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .charts-container {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-
-        .chart-card {
-            background: var(--light-bg);
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .chart-card h3 {
-            margin: 0 0 15px 0;
-            color: var(--text-primary);
-            font-size: 1.1rem;
-        }
-
-        .chart-card canvas {
-            max-width: 100%;
-            height: auto;
-        }
-
-        /* Objectif annuel modernisé */
-        .progress-container {
-            padding: 25px;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .progress-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .progress-emoji {
-            font-size: 2rem;
-            margin-right: 15px;
-        }
-
-        .progress-info {
-            flex: 1;
-        }
-
-        .progress-main {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--text-primary);
-            margin-bottom: 2px;
-        }
-
-        .progress-sub {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .progress-percent {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            background: rgba(59, 130, 246, 0.1);
-            padding: 8px 12px;
-            border-radius: 12px;
-        }
-
-        .progress-bar-container {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 12px;
-            background: #e2e8f0;
-            border-radius: 6px;
-            overflow: visible;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), #60a5fa);
-            border-radius: 6px;
-            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 0%;
-            position: relative;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-        }
-
-        .progress-shine {
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(255,255,255,0.4) 40%, 
-                rgba(255,255,255,0.6) 50%, 
-                rgba(255,255,255,0.4) 60%, 
-                transparent 100%);
-            border-radius: 6px;
-            animation: shine 2s ease-in-out infinite;
-        }
-
-        @keyframes shine {
-            0% { left: -100%; }
-            50% { left: 100%; }
-            100% { left: 100%; }
-        }
-
-        .progress-markers {
-            position: absolute;
-            top: -5px;
-            left: 0;
-            right: 0;
-            height: 22px;
-        }
-
-        .milestone {
-            position: absolute;
-            transform: translateX(-50%);
-        }
-
-        .milestone-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #cbd5e1;
-            border: 2px solid white;
-            margin: 0 auto 4px;
-            transition: all 0.3s ease;
-        }
-
-        .milestone.reached .milestone-dot {
-            background: #22c55e;
-            box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
-        }
-
-        .milestone-label {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .progress-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .stat-item {
-            text-align: center;
-            background: white;
-            padding: 12px 8px;
-            border-radius: 10px;
-            border: 1px solid #f1f5f9;
-        }
-
-        .stat-value {
-            display: block;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 2px;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        /* Animation d'accomplissement */
-        .progress-fill.completed {
-            animation: celebrate 1s ease-in-out;
-        }
-
-        @keyframes celebrate {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-
-        /* Styles pour le scan ISBN */
-        .isbn-input-group {
-            display: flex;
-            gap: 10px;
-            align-items: stretch;
-        }
-
-        .isbn-input-group input {
-            flex: 1;
-        }
-
-        .btn-scanner {
-            background: #16a34a;
-            color: white;
-            padding: 12px 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-
-        .btn-scanner:hover {
-            background: #15803d;
-            transform: translateY(-1px);
-        }
-
-        /* Modal Scanner */
-        .scanner-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .scanner-container {
-            background: white;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
-            max-height: 90vh;
-            overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-        }
-
-        .scanner-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid #e2e8f0;
-            background: #f8fafc;
-        }
-
-        .scanner-header h3 {
-            margin: 0;
-            color: var(--text-primary);
-        }
-
-        .btn-close {
-            background: #ef4444;
-            color: white;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .scanner-content {
-            padding: 20px;
-        }
-
-        .scanner-video {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 4/3;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        #videoElement {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .scanner-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .scanner-frame {
-            position: relative;
-            width: 250px;
-            height: 100px;
-            border: 2px solid #16a34a;
-            border-radius: 8px;
-            background: rgba(22, 163, 74, 0.1);
-        }
-
-        .scanner-line {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #16a34a;
-            animation: scan 2s ease-in-out infinite;
-            box-shadow: 0 0 10px #16a34a;
-        }
-
-        @keyframes scan {
-            0%, 100% { transform: translateY(-50px); opacity: 0; }
-            50% { transform: translateY(0); opacity: 1; }
-        }
-
-        .scanner-instructions {
-            color: white;
-            text-align: center;
-            margin-top: 20px;
-            font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .scanner-controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .scan-result {
-            margin-top: 15px;
-            padding: 15px;
-            background: #f0fdf4;
-            border: 1px solid #16a34a;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .result-success {
-            color: #15803d;
-            font-weight: 600;
-        }
-
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-            .scanner-container {
-                margin: 10px;
-            }
-            
-            .scanner-frame {
-                width: 200px;
-                height: 80px;
-            }
-            
-            .isbn-input-group {
-                flex-direction: column;
-            }
-            
-            .btn-scanner {
-                width: 100%;
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .stats-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-        }
-
-        .books-section {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .books-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .search-filter {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .search-filter input {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .books-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .book-card {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .book-card:hover {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .book-cover {
-            width: 80px;
-            height: 120px;
-            background: var(--light-bg);
-            border-radius: 8px;
-            float: left;
-            margin-right: 15px;
-            background-size: cover;
-            background-position: center;
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
-            font-size: 2rem;
-            background-image: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        }
-        
-        .book-cover.has-image {
-            font-size: 0; /* Cache l'emoji quand il y a une vraie image */
-        }
-
-        .book-info {
-            overflow: hidden;
-        }
-
-        .book-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 5px;
-            line-height: 1.3;
-        }
-
-        .book-author {
-            color: var(--text-secondary);
-            margin-bottom: 10px;
-        }
-
-        .book-meta {
-            display: flex;
-            gap: 15px;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 10px;
-        }
-
-        .book-status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .status-to-read {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-reading {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .status-read {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .book-summary {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin: 10px 0;
-            max-height: 60px;
-            overflow: hidden;
-            line-height: 1.4;
-        }
-
-        .book-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 15px;
-        }
-
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            border-radius: 6px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: var(--text-secondary);
-        }
-
-        .spinner {
-            border: 2px solid var(--border-color);
-            border-top: 2px solid var(--primary-color);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 8px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-
-        .success {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .main-content {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .search-filter {
-                flex-direction: column;
-            }
-
-            .books-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .book-cover {
-                width: 60px;
-                height: 90px;
-            }
-        }
-
-        /* Version Footer */
-        .version-footer {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            color: #666;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            z-index: 1000;
-            user-select: none;
-        }
-
-        .version-text {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .version-date {
-            opacity: 0.7;
-        }
-
-        @media (max-width: 768px) {
-            .version-footer {
-                position: relative;
-                bottom: auto;
-                right: auto;
-                text-align: center;
-                margin: 20px auto 10px;
-                width: fit-content;
-                display: block;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="container">
-        <!-- En-tête -->
-        <div class="header">
-            <h1>📚 Ma Bibliothèque Intelligente</h1>
-            <p>Gérez votre collection personnelle avec l'aide de l'intelligence artificielle</p>
-        </div>
+    <!-- App Container -->
+    <div class="app-container">
+        
+        <!-- PAGE 1: ACCUEIL -->
+        <div class="page" id="page-home" style="display: block;">
+            <div class="page-header">
+                <h1>🏠 Accueil</h1>
+            </div>
 
-        <!-- Statistiques -->
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="totalBooks">0</div>
-                <div class="stat-label">Livres total</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="readBooks">0</div>
-                <div class="stat-label">Livres lus</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="currentlyReading">0</div>
-                <div class="stat-label">En cours</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="toReadBooks">0</div>
-                <div class="stat-label">À lire</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="averageRating">-</div>
-                <div class="stat-label">Note moyenne</div>
-            </div>
-        </div>
 
-        <!-- Section Statistiques détaillées -->
-        <div class="detailed-stats" id="detailedStats">
-            <div class="stats-header">
-                <h2>📊 Statistiques détaillées</h2>
-                <button id="toggleStats" class="btn btn-secondary">👁️ Afficher les graphiques</button>
-            </div>
             
-            <div class="charts-container" id="chartsContainer" style="display: none;">
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <h3>📚 Répartition des livres</h3>
-                        <canvas id="statusChart" width="300" height="300"></canvas>
-                    </div>
-                    
-                    <div class="chart-card">
-                        <h3>⭐ Distribution des notes</h3>
-                        <canvas id="ratingChart" width="300" height="200"></canvas>
-                    </div>
-                    
-                    <div class="chart-card">
-                        <h3>📈 Évolution mensuelle</h3>
-                        <canvas id="evolutionChart" width="300" height="200"></canvas>
-                    </div>
-                    
-                    <div class="chart-card">
-                        <h3>🎯 Objectif annuel</h3>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="yearlyProgress"></div>
-                            </div>
-                            <div class="progress-text" id="progressText">0 / 24 livres cette année</div>
-                        </div>
-                    </div>
+            <!-- Statistiques rapides -->
+            <div class="stats-quick">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalBooks">0</div>
+                    <div class="stat-label">Livres</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="readBooks">0</div>
+                    <div class="stat-label">Lus</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="currentlyReading">0</div>
+                    <div class="stat-label">En cours</div>
+                </div>
+            </div>
+
+            <!-- Livres en cours -->
+            <div class="section">
+                <h2>📖 En cours de lecture</h2>
+                <div id="currentReadingList" class="books-grid"></div>
+            </div>
+
+            <!-- Derniers ajouts -->
+            <div class="section">
+                <h2>🆕 Derniers ajouts</h2>
+                <div id="recentBooksList" class="books-grid"></div>
+            </div>
+        </div>
+
+        <!-- PAGE 2: BIBLIOTHÈQUE -->
+        <div class="page" id="page-library" style="display: none;">
+            <div class="page-header">
+                <h1>📚 Ma Bibliothèque</h1>
+            </div>
+
+            <div class="search-filter">
+                <input type="text" id="searchBooks" placeholder="🔍 Rechercher...">
+                <select id="filterStatus">
+                    <option value="">Tous les statuts</option>
+                    <option value="to-read">À lire</option>
+                    <option value="reading">En cours</option>
+                    <option value="read">Lus</option>
+                </select>
+            </div>
+
+            <div id="booksContainer">
+                <div class="loading" id="loadingBooks">
+                    <div class="spinner"></div>
+                    Chargement...
+                </div>
+                <div id="booksList" class="books-grid"></div>
+                <div id="emptyState" style="display: none; text-align: center; padding: 60px 20px;">
+                    <h3>📚 Bibliothèque vide</h3>
+                    <p>Ajoutez votre premier livre !</p>
                 </div>
             </div>
         </div>
 
-        <div class="main-content">
-            <!-- Section Ajouter un livre -->
-            <div class="add-book-section">
-                <h2>➕ Ajouter un livre</h2>
-                <form id="bookForm">
-                    <div class="form-group">
-                        <label for="isbn">ISBN</label>
-                        <input type="text" id="isbn" placeholder="Entrez l'ISBN du livre" style="margin-bottom: 10px;">
-                        <button type="button" id="searchBtn" class="btn btn-secondary" style="width: 100%;">
-                            <span class="spinner" style="display: none;"></span>
-                            🔍 Rechercher par ISBN
-                        </button>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="title">Titre *</label>
-                        <input type="text" id="title" required placeholder="Le titre du livre">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="author">Auteur *</label>
-                        <input type="text" id="author" required placeholder="Nom de l'auteur">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="pages">Nombre de pages</label>
-                        <input type="number" id="pages" placeholder="300">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="status">Statut</label>
-                        <select id="status" required>
-                            <option value="to-read">À lire</option>
-                            <option value="reading">En cours de lecture</option>
-                            <option value="read">Lu</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group" id="ratingGroup" style="display: none;">
-                        <label for="rating">Note (optionnel)</label>
-                        <div class="star-rating" id="starRating">
-                            <span class="star" data-rating="1">⭐</span>
-                            <span class="star" data-rating="2">⭐</span>
-                            <span class="star" data-rating="3">⭐</span>
-                            <span class="star" data-rating="4">⭐</span>
-                            <span class="star" data-rating="5">⭐</span>
-                        </div>
-                        <input type="hidden" id="rating" value="0">
-                        <small class="rating-text">Cliquez sur les étoiles pour noter</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="summary">Résumé</label>
-                        <textarea id="summary" rows="4" placeholder="Résumé du livre (sera complété automatiquement si trouvé)"></textarea>
-                    </div>
-
-                    <div class="form-group" id="learningsGroup" style="display: none;">
-                        <label for="learnings">Apprentissages clés</label>
-                        <textarea id="learnings" rows="3" placeholder="Quels sont les apprentissages principaux de ce livre?"></textarea>
-                        <button type="button" id="generateLearnings" class="btn btn-secondary" style="margin-top: 10px; width: 100%;">
-                            🤖 Générer avec IA
-                        </button>
-                    </div>
-
-                    <button type="submit" class="btn" style="width: 100%; margin-top: 20px;">
-                        ➕ Ajouter à ma bibliothèque
-                    </button>
-                </form>
-
-                <div id="message"></div>
+        <!-- PAGE 3: AJOUTER -->
+        <div class="page" id="page-add" style="display: none;">
+            <div class="page-header">
+                <h1>➕ Ajouter un livre</h1>
             </div>
 
-            <!-- Section Liste des livres -->
-            <div class="books-section">
-                <div class="books-header">
-                    <h2>📖 Ma Collection</h2>
-                    <button id="exportBtn" class="btn btn-secondary">
-                        📤 Exporter
+            <form id="bookForm">
+                <div class="form-group">
+                    <label for="isbn">ISBN</label>
+                    <input type="text" id="isbn" placeholder="Entrez l'ISBN du livre">
+                    <button type="button" id="searchBtn" class="btn btn-secondary">
+                        🔍 Rechercher par ISBN
                     </button>
                 </div>
 
-                <div class="search-filter">
-                    <input type="text" id="searchBooks" placeholder="🔍 Rechercher dans ma bibliothèque...">
-                    <select id="filterStatus">
-                        <option value="">Tous les statuts</option>
+                <div class="form-group">
+                    <label for="title">Titre *</label>
+                    <input type="text" id="title" required placeholder="Le titre du livre">
+                </div>
+
+                <div class="form-group">
+                    <label for="author">Auteur *</label>
+                    <input type="text" id="author" required placeholder="Nom de l'auteur">
+                </div>
+
+                <div class="form-group">
+                    <label for="pages">Nombre de pages</label>
+                    <input type="number" id="pages" placeholder="300">
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Statut</label>
+                    <select id="status" required>
                         <option value="to-read">À lire</option>
-                        <option value="reading">En cours</option>
-                        <option value="read">Lus</option>
+                        <option value="reading">En cours de lecture</option>
+                        <option value="read">Lu</option>
                     </select>
                 </div>
 
-                <div id="booksContainer">
-                    <div class="loading" id="loadingBooks">
-                        <div class="spinner"></div>
-                        Chargement de votre bibliothèque...
+                <div class="form-group">
+                    <label for="rating">Note</label>
+                    <div class="star-rating" id="starRating">
+                        <span class="star" data-rating="1">☆</span>
+                        <span class="star" data-rating="2">☆</span>
+                        <span class="star" data-rating="3">☆</span>
+                        <span class="star" data-rating="4">☆</span>
+                        <span class="star" data-rating="5">☆</span>
                     </div>
-                    <div id="booksList" class="books-grid"></div>
-                    <div id="emptyState" style="display: none; text-align: center; padding: 40px; color: var(--text-secondary);">
-                        <h3>📚 Votre bibliothèque est vide</h3>
-                        <p>Ajoutez votre premier livre pour commencer !</p>
+                    <input type="hidden" id="rating" value="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="summary">Résumé</label>
+                    <textarea id="summary" rows="3" placeholder="Résumé du livre"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="learnings">Apprentissages</label>
+                    <textarea id="learnings" rows="3" placeholder="Ce que vous avez appris"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    ✅ Ajouter à ma bibliothèque
+                </button>
+            </form>
+        </div>
+
+        <!-- PAGE 4: STATISTIQUES -->
+        <div class="page" id="page-stats" style="display: none;">
+            <div class="page-header">
+                <h1>📊 Statistiques</h1>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalBooks2">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="toReadBooks">0</div>
+                    <div class="stat-label">À lire</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="averageRating">-</div>
+                    <div class="stat-label">Note moyenne</div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3>📚 Répartition des livres</h3>
+                    <canvas id="statusChart" width="300" height="300"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <h3>⭐ Distribution des notes</h3>
+                    <canvas id="ratingChart" width="300" height="200"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <h3>📈 Évolution mensuelle</h3>
+                    <canvas id="evolutionChart" width="300" height="200"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <h3>🎯 Objectif annuel</h3>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="yearlyProgress"></div>
+                        </div>
+                        <div class="progress-text" id="progressText">0 / 24 livres</div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- PAGE 5: PROFIL -->
+        <div class="page" id="page-profile" style="display: none;">
+            <div class="page-header">
+                <h1>👤 Profil</h1>
+            </div>
+
+            <div class="profile-section">
+                <div class="profile-avatar">
+                    <div class="avatar-circle">📚</div>
+                    <h2 id="userName">Lecteur</h2>
+                    <p class="profile-subtitle">Amateur de livres</p>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <span class="stat-value" id="profileTotalBooks">0</span>
+                        <span class="stat-name">Livres</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-value" id="profileReadBooks">0</span>
+                        <span class="stat-name">Lus</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-value" id="profilePages">0</span>
+                        <span class="stat-name">Pages</span>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>⚙️ Paramètres</h3>
+                    
+                    <div class="setting-item">
+                        <label for="yearlyGoal">Objectif annuel</label>
+                        <input type="number" id="yearlyGoal" value="24" min="1" max="365">
+                    </div>
+
+                    <div class="setting-item">
+                        <label for="userNameInput">Nom d'utilisateur</label>
+                        <input type="text" id="userNameInput" placeholder="Votre nom">
+                    </div>
+
+                    <button id="saveSettings" class="btn btn-primary">💾 Sauvegarder</button>
+                </div>
+
+                <div class="actions-section">
+                    <h3>🔧 Actions</h3>
+                    <button id="exportBtn" class="btn btn-secondary">📤 Exporter ma bibliothèque</button>
+                    <button id="importBtn" class="btn btn-secondary">📥 Importer une bibliothèque</button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;">
+                    <button id="resetBtn" class="btn btn-danger">🗑️ Réinitialiser les données</button>
+                </div>
+
+                <div class="about-section">
+                    <p class="version-info">📚 Ma Bibliothèque v0.5.0</p>
+                    <p class="version-date">Décembre 2025 • Architecture multi-pages</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-page="home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Accueil</span>
+            </button>
+            
+            <button class="nav-item" data-page="library">
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">Bibliothèque</span>
+            </button>
+            
+            <button class="nav-item nav-item-center" data-page="add">
+                <span class="nav-icon-large">➕</span>
+            </button>
+            
+            <button class="nav-item" data-page="stats">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Stats</span>
+            </button>
+            
+            <button class="nav-item" data-page="profile">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Profil</span>
+            </button>
+        </nav>
+
     </div>
 
-    <script>
-        // Configuration
-        const CONFIG = {
-            GOOGLE_BOOKS_API: 'https://www.googleapis.com/books/v1/volumes',
-            OPENLIBRARY_API: 'https://openlibrary.org/api/books',
-            OPENLIBRARY_COVERS: 'https://covers.openlibrary.org/b/isbn',
-            STORAGE_KEY: 'myLibraryBooks',
-            OPENAI_API_KEY: null // À configurer si vous voulez la génération IA
-        };
-        
-        // Variable pour éviter le spam de l'API
-        let lastSearchTime = 0;
+    <!-- Scripts modulaires -->
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/app.js"></script>
 
-        // État de l'application
-        let books = [];
-        let filteredBooks = [];
-
-        // Éléments DOM
-        const elements = {
-            bookForm: document.getElementById('bookForm'),
-            searchBtn: document.getElementById('searchBtn'),
-            generateLearnings: document.getElementById('generateLearnings'),
-            booksList: document.getElementById('booksList'),
-            searchBooks: document.getElementById('searchBooks'),
-            filterStatus: document.getElementById('filterStatus'),
-            exportBtn: document.getElementById('exportBtn'),
-            message: document.getElementById('message'),
-            loadingBooks: document.getElementById('loadingBooks'),
-            emptyState: document.getElementById('emptyState')
-        };
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            loadBooks();
-            bindEvents();
-            updateStats();
-            setTimeout(() => {
-                elements.loadingBooks.style.display = 'none';
-                displayBooks();
-            }, 500);
-        });
-
-        // Événements
-        function bindEvents() {
-            elements.bookForm.addEventListener('submit', handleAddBook);
-            elements.searchBtn.addEventListener('click', searchBookByISBN);
-            elements.generateLearnings.addEventListener('click', generateLearningsWithAI);
-            elements.searchBooks.addEventListener('input', filterBooks);
-            elements.filterStatus.addEventListener('change', filterBooks);
-            elements.exportBtn.addEventListener('click', exportLibrary);
-            
-            // Montrer les champs apprentissages ET rating si statut = "lu"
-            document.getElementById('status').addEventListener('change', function(e) {
-                const learningsGroup = document.getElementById('learningsGroup');
-                const ratingGroup = document.getElementById('ratingGroup');
-                const isRead = e.target.value === 'read';
-                
-                learningsGroup.style.display = isRead ? 'block' : 'none';
-                ratingGroup.style.display = isRead ? 'block' : 'none';
-                
-                // Reset rating si on change de statut
-                if (!isRead) {
-                    resetRating();
-                }
-            });
-            
-            // Gestion des étoiles
-            setupStarRating();
-            
-            // Toggle des statistiques détaillées
-            document.getElementById('toggleStats').addEventListener('click', toggleDetailedStats);
-        }
-
-        // Gestion du localStorage
-        function loadBooks() {
-            const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
-            books = stored ? JSON.parse(stored) : [];
-            filteredBooks = [...books];
-        }
-
-        function saveBooks() {
-            localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(books));
-        }
-
-        // API Google Books
-        async function searchBookByISBN() {
-            const isbnRaw = document.getElementById('isbn').value.trim();
-            if (!isbnRaw) {
-                showMessage('Veuillez entrer un ISBN', 'error');
-                return;
-            }
-            
-            // Nettoyer l'ISBN (enlever tirets et espaces)
-            const isbn = isbnRaw.replace(/[-\s]/g, '');
-            if (isbn.length !== 10 && isbn.length !== 13) {
-                showMessage('Format ISBN invalide. Utilisez un ISBN-10 ou ISBN-13.', 'error');
-                return;
-            }
-
-            // Éviter le spam - attendre au moins 1 seconde entre les recherches
-            const now = Date.now();
-            if (now - lastSearchTime < 1000) {
-                showMessage('⏳ Attendez un moment avant de refaire une recherche', 'warning');
-                return;
-            }
-            lastSearchTime = now;
-
-            const btn = elements.searchBtn;
-            
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner" style="display: inline-block; width: 16px; height: 16px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></span> Recherche en cours...';
-
-            try {
-                // Essayer d'abord Google Books API
-                let bookData = await searchGoogleBooks(isbn);
-                
-                // Si ça ne marche pas, essayer OpenLibrary
-                if (!bookData) {
-                    console.log('Google Books n\'a rien trouvé, essai avec OpenLibrary...');
-                    bookData = await searchOpenLibrary(isbn);
-                }
-                
-                // Si on a des données mais pas de couverture, essayer d'en trouver une
-                if (bookData && !bookData.cover) {
-                    console.log('Recherche de couverture supplémentaire...');
-                    bookData.cover = await findBookCover(isbn);
-                }
-                
-                if (bookData) {
-                    populateBookForm(bookData);
-                    showMessage('✅ Livre trouvé et informations complétées !', 'success');
-                } else {
-                    showMessage('❌ Aucun livre trouvé pour cet ISBN dans nos bases de données.', 'error');
-                }
-            } catch (error) {
-                console.error('Erreur lors de la recherche:', error);
-                showMessage(`❌ Erreur lors de la recherche: ${error.message}`, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '🔍 Rechercher par ISBN';
-            }
-        }
-
-        async function searchGoogleBooks(isbn) {
-            try {
-                const url = `${CONFIG.GOOGLE_BOOKS_API}?q=isbn:${isbn}&maxResults=1&printType=books`;
-                console.log('Recherche Google Books:', url);
-                
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    console.log('Google Books error:', response.status);
-                    return null;
-                }
-                
-                const data = await response.json();
-                console.log('Réponse Google Books:', data);
-
-                if (data.items && data.items.length > 0) {
-                    const book = data.items[0].volumeInfo;
-                    return {
-                        title: book.title || '',
-                        authors: book.authors || [],
-                        pageCount: book.pageCount || 0,
-                        description: book.description || '',
-                        cover: book.imageLinks?.thumbnail?.replace('http:', 'https:') || book.imageLinks?.smallThumbnail?.replace('http:', 'https:') || ''
-                    };
-                }
-                return null;
-            } catch (error) {
-                console.log('Erreur Google Books:', error);
-                return null;
-            }
-        }
-
-        async function searchOpenLibrary(isbn) {
-            try {
-                const url = `${CONFIG.OPENLIBRARY_API}?bibkeys=ISBN:${isbn}&format=json&jscmd=data`;
-                console.log('Recherche OpenLibrary:', url);
-                
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    console.log('OpenLibrary error:', response.status);
-                    return null;
-                }
-                
-                const data = await response.json();
-                console.log('Réponse OpenLibrary:', data);
-                
-                const bookKey = `ISBN:${isbn}`;
-                if (data[bookKey]) {
-                    const book = data[bookKey];
-                    
-                    // Essayer plusieurs tailles de couverture OpenLibrary
-                    let cover = '';
-                    if (book.cover) {
-                        cover = book.cover.large || book.cover.medium || book.cover.small || '';
-                    }
-                    
-                    // Fallback: construire l'URL directement
-                    if (!cover) {
-                        const coverUrl = `${CONFIG.OPENLIBRARY_COVERS}/${isbn}-L.jpg`;
-                        // Vérifier si la couverture existe
-                        if (await checkImageExists(coverUrl)) {
-                            cover = coverUrl;
-                        }
-                    }
-                    
-                    return {
-                        title: book.title || '',
-                        authors: book.authors ? book.authors.map(a => a.name) : [],
-                        pageCount: book.number_of_pages || 0,
-                        description: book.subtitle || '',
-                        cover: cover
-                    };
-                }
-                return null;
-            } catch (error) {
-                console.log('Erreur OpenLibrary:', error);
-                return null;
-            }
-        }
-
-        // Vérifier si une image existe
-        async function checkImageExists(url) {
-            try {
-                const response = await fetch(url, { method: 'HEAD' });
-                return response.ok && response.headers.get('content-type')?.startsWith('image/');
-            } catch {
-                return false;
-            }
-        }
-
-        // Chercher une couverture dans plusieurs sources
-        async function findBookCover(isbn) {
-            const sources = [
-                // OpenLibrary - différentes tailles
-                `${CONFIG.OPENLIBRARY_COVERS}/${isbn}-L.jpg`,
-                `${CONFIG.OPENLIBRARY_COVERS}/${isbn}-M.jpg`,
-                `${CONFIG.OPENLIBRARY_COVERS}/${isbn}-S.jpg`,
-                // ISBN-10 si c'est un ISBN-13
-                ...(isbn.length === 13 ? [
-                    `${CONFIG.OPENLIBRARY_COVERS}/${convertISBN13to10(isbn)}-L.jpg`,
-                    `${CONFIG.OPENLIBRARY_COVERS}/${convertISBN13to10(isbn)}-M.jpg`
-                ] : []),
-                // ISBN-13 si c'est un ISBN-10  
-                ...(isbn.length === 10 ? [
-                    `${CONFIG.OPENLIBRARY_COVERS}/${convertISBN10to13(isbn)}-L.jpg`,
-                    `${CONFIG.OPENLIBRARY_COVERS}/${convertISBN10to13(isbn)}-M.jpg`
-                ] : [])
-            ];
-            
-            console.log('Recherche de couverture dans:', sources);
-            
-            for (const url of sources) {
-                if (await checkImageExists(url)) {
-                    console.log('Couverture trouvée:', url);
-                    return url;
-                }
-            }
-            
-            return '';
-        }
-
-        // Conversion ISBN-13 vers ISBN-10
-        function convertISBN13to10(isbn13) {
-            if (isbn13.length !== 13 || !isbn13.startsWith('978')) return isbn13;
-            
-            const isbn10base = isbn13.substring(3, 12);
-            let checksum = 0;
-            for (let i = 0; i < 9; i++) {
-                checksum += parseInt(isbn10base[i]) * (10 - i);
-            }
-            const checksumDigit = (11 - (checksum % 11)) % 11;
-            const checkDigit = checksumDigit === 10 ? 'X' : checksumDigit.toString();
-            
-            return isbn10base + checkDigit;
-        }
-
-        // Conversion ISBN-10 vers ISBN-13  
-        function convertISBN10to13(isbn10) {
-            if (isbn10.length !== 10) return isbn10;
-            
-            const isbn13base = '978' + isbn10.substring(0, 9);
-            let checksum = 0;
-            for (let i = 0; i < 12; i++) {
-                const digit = parseInt(isbn13base[i]);
-                checksum += i % 2 === 0 ? digit : digit * 3;
-            }
-            const checkDigit = (10 - (checksum % 10)) % 10;
-            
-            return isbn13base + checkDigit;
-        }
-
-        function populateBookForm(bookData) {
-            document.getElementById('title').value = bookData.title || '';
-            document.getElementById('author').value = (bookData.authors && bookData.authors.length > 0) ? bookData.authors[0] : '';
-            document.getElementById('pages').value = bookData.pageCount || '';
-            document.getElementById('summary').value = bookData.description || '';
-            
-            // Stocker l'URL de la couverture pour l'utiliser lors de l'ajout
-            if (bookData.cover) {
-                document.getElementById('isbn').setAttribute('data-cover-url', bookData.cover);
-            }
-        }
-
-        // Ajouter un livre
-        function handleAddBook(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const book = {
-                id: Date.now(),
-                title: document.getElementById('title').value.trim(),
-                author: document.getElementById('author').value.trim(),
-                pages: parseInt(document.getElementById('pages').value) || 0,
-                status: document.getElementById('status').value,
-                summary: document.getElementById('summary').value.trim(),
-                learnings: document.getElementById('learnings').value.trim(),
-                rating: parseInt(document.getElementById('rating').value) || 0,
-                addedDate: new Date().toLocaleDateString('fr-FR'),
-                cover: document.getElementById('isbn').getAttribute('data-cover-url') || ''
-            };
-
-            books.push(book);
-            saveBooks();
-            
-            // Reset form complètement
-            e.target.reset();
-            document.getElementById('isbn').value = ''; // Vider le champ ISBN aussi
-            document.getElementById('isbn').removeAttribute('data-cover-url'); // Nettoyer la couverture stockée
-            document.getElementById('learningsGroup').style.display = 'none';
-            document.getElementById('ratingGroup').style.display = 'none';
-            resetRating();
-            
-            // Reset du bouton de recherche ISBN
-            const searchBtn = elements.searchBtn;
-            searchBtn.disabled = false;
-            searchBtn.innerHTML = '🔍 Rechercher par ISBN';
-            
-            showMessage(`✅ "${book.title}" ajouté à votre bibliothèque !`, 'success');
-            
-            updateStats();
-            filterBooks();
-        }
-
-        // Génération IA (simulation)
-        async function generateLearningsWithAI() {
-            const title = document.getElementById('title').value;
-            const summary = document.getElementById('summary').value;
-            
-            if (!title) {
-                showMessage('Veuillez d\'abord renseigner le titre', 'error');
-                return;
-            }
-
-            const btn = elements.generateLearnings;
-            btn.disabled = true;
-            btn.innerHTML = '🤖 Génération en cours...';
-
-            // Simulation d'appel API (remplacer par vraie API OpenAI si besoin)
-            setTimeout(() => {
-                const mockLearnings = [
-                    `• Principe clé 1 extrait de "${title}"`,
-                    `• Méthode pratique à appliquer`,
-                    `• Changement de perspective proposé`,
-                    `• Action concrète à mettre en place`
-                ].join('\n');
-                
-                document.getElementById('learnings').value = mockLearnings;
-                btn.disabled = false;
-                btn.innerHTML = '🤖 Générer avec IA';
-                showMessage('✨ Apprentissages générés !', 'success');
-            }, 2000);
-        }
-
-        // Affichage des livres
-        function displayBooks() {
-            const container = elements.booksList;
-            const emptyState = elements.emptyState;
-            
-            if (filteredBooks.length === 0) {
-                container.innerHTML = '';
-                emptyState.style.display = books.length === 0 ? 'block' : 'none';
-                return;
-            }
-            
-            emptyState.style.display = 'none';
-            
-            container.innerHTML = filteredBooks.map(book => `
-                <div class="book-card">
-                    <div class="book-cover ${book.cover ? 'has-image' : ''}" style="${book.cover ? `background-image: url('${book.cover}')` : ''}">
-                        ${book.cover ? '' : '📖'}
-                    </div>
-                    <div class="book-info">
-                        <div class="book-title">${book.title}</div>
-                        <div class="book-author">par ${book.author}</div>
-                        <div class="book-meta">
-                            ${book.pages ? `<span>📄 ${book.pages} pages</span>` : ''}
-                            <span>📅 ${book.addedDate}</span>
-                        </div>
-                        <span class="book-status status-${book.status}">
-                            ${getStatusLabel(book.status)}
-                        </span>
-                        ${book.status === 'read' ? `<div class="book-rating"><span class="stars">${renderStars(book.rating || 0)}</span> ${book.rating ? `(${book.rating}/5)` : '(Non noté)'}</div>` : ''}
-                        ${book.summary ? `<div class="book-summary">${book.summary.substring(0, 120)}${book.summary.length > 120 ? '...' : ''}</div>` : ''}
-                        ${book.learnings ? `<div class="book-summary"><strong>💡 Apprentissages:</strong> ${book.learnings.substring(0, 100)}${book.learnings.length > 100 ? '...' : ''}</div>` : ''}
-                        <div class="book-actions">
-                            <button class="btn btn-small btn-secondary" onclick="editBookStatus(${book.id})">
-                                ✏️ Statut
-                            </button>
-                            ${book.status === 'read' ? `<button class="btn btn-small btn-secondary" onclick="editBookRating(${book.id})">⭐ Noter</button>` : ''}
-                            <button class="btn btn-small" onclick="viewBookDetails(${book.id})">
-                                👁️ Voir
-                            </button>
-                            <button class="btn btn-small" style="background: var(--danger-color);" onclick="deleteBook(${book.id})">
-                                🗑️
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function getStatusLabel(status) {
-            const labels = {
-                'to-read': '📚 À lire',
-                'reading': '📖 En cours',
-                'read': '✅ Lu'
-            };
-            return labels[status] || status;
-        }
-
-        // Filtrage
-        function filterBooks() {
-            const searchTerm = elements.searchBooks.value.toLowerCase();
-            const statusFilter = elements.filterStatus.value;
-            
-            filteredBooks = books.filter(book => {
-                const matchesSearch = !searchTerm || 
-                    book.title.toLowerCase().includes(searchTerm) ||
-                    book.author.toLowerCase().includes(searchTerm);
-                const matchesStatus = !statusFilter || book.status === statusFilter;
-                return matchesSearch && matchesStatus;
-            });
-            
-            displayBooks();
-        }
-
-        // Système de rating par étoiles
-        function setupStarRating() {
-            const stars = document.querySelectorAll('.star');
-            const ratingInput = document.getElementById('rating');
-            
-            stars.forEach(star => {
-                star.addEventListener('click', function() {
-                    const rating = parseInt(this.getAttribute('data-rating'));
-                    setRating(rating);
-                });
-                
-                star.addEventListener('mouseenter', function() {
-                    const rating = parseInt(this.getAttribute('data-rating'));
-                    highlightStars(rating, true);
-                });
-            });
-            
-            document.getElementById('starRating').addEventListener('mouseleave', function() {
-                const currentRating = parseInt(ratingInput.value);
-                highlightStars(currentRating, false);
-            });
-        }
-        
-        function setRating(rating) {
-            document.getElementById('rating').value = rating;
-            highlightStars(rating, false);
-        }
-        
-        function resetRating() {
-            document.getElementById('rating').value = 0;
-            highlightStars(0, false);
-        }
-        
-        function highlightStars(rating, isHover) {
-            const stars = document.querySelectorAll('.star');
-            stars.forEach((star, index) => {
-                star.classList.remove('active', 'hover');
-                if (index < rating) {
-                    star.classList.add(isHover ? 'hover' : 'active');
-                }
-            });
-        }
-        
-        function renderStars(rating) {
-            let stars = '';
-            for (let i = 1; i <= 5; i++) {
-                stars += i <= rating ? '★' : '☆';
-            }
-            return stars;
-        }
-
-        // Actions sur les livres
-        function editBookStatus(bookId) {
-            const book = books.find(b => b.id === bookId);
-            if (!book) return;
-            
-            const newStatus = prompt('Nouveau statut:\n1. to-read (À lire)\n2. reading (En cours)\n3. read (Lu)', book.status);
-            if (newStatus && ['to-read', 'reading', 'read'].includes(newStatus)) {
-                book.status = newStatus;
-                // Si le statut n'est plus "lu", enlever la note
-                if (newStatus !== 'read') {
-                    book.rating = 0;
-                }
-                saveBooks();
-                updateStats();
-                filterBooks();
-                showMessage('✅ Statut mis à jour', 'success');
-            }
-        }
-
-        function editBookRating(bookId) {
-            const book = books.find(b => b.id === bookId);
-            if (!book || book.status !== 'read') return;
-            
-            const currentRating = book.rating || 0;
-            const newRating = prompt(`Noter "${book.title}" (1-5 étoiles):\nNote actuelle: ${currentRating > 0 ? currentRating + ' étoiles' : 'Aucune'}`, currentRating);
-            
-            if (newRating !== null) {
-                const rating = parseInt(newRating);
-                if (rating >= 0 && rating <= 5) {
-                    book.rating = rating;
-                    saveBooks();
-                    updateStats();
-                    filterBooks();
-                    showMessage(`✅ Note mise à jour: ${rating > 0 ? rating + ' étoiles' : 'Note supprimée'}`, 'success');
-                } else {
-                    showMessage('❌ La note doit être entre 0 et 5', 'error');
-                }
-            }
-        }
-
-        function viewBookDetails(bookId) {
-            const book = books.find(b => b.id === bookId);
-            if (!book) return;
-            
-            let details = `📚 ${book.title}\n👤 ${book.author}\n📊 Statut: ${getStatusLabel(book.status)}`;
-            if (book.pages) details += `\n📄 ${book.pages} pages`;
-            if (book.summary) details += `\n\n📖 Résumé:\n${book.summary}`;
-            if (book.learnings) details += `\n\n💡 Apprentissages:\n${book.learnings}`;
-            
-            alert(details);
-        }
-
-        function deleteBook(bookId) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer ce livre ?')) {
-                books = books.filter(b => b.id !== bookId);
-                saveBooks();
-                updateStats();
-                filterBooks();
-                showMessage('🗑️ Livre supprimé', 'success');
-            }
-        }
-
-        // Helper pour roundRect (compatibilité)
-        if (!CanvasRenderingContext2D.prototype.roundRect) {
-            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
-                this.beginPath();
-                this.moveTo(x + radius, y);
-                this.lineTo(x + width - radius, y);
-                this.quadraticCurveTo(x + width, y, x + width, y + radius);
-                this.lineTo(x + width, y + height - radius);
-                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-                this.lineTo(x + radius, y + height);
-                this.quadraticCurveTo(x, y + height, x, y + height - radius);
-                this.lineTo(x, y + radius);
-                this.quadraticCurveTo(x, y, x + radius, y);
-                this.closePath();
-            };
-        }
-
-        // Toggle statistiques détaillées
-        function toggleDetailedStats() {
-            const container = document.getElementById('chartsContainer');
-            const button = document.getElementById('toggleStats');
-            
-            if (container.style.display === 'none') {
-                container.style.display = 'block';
-                button.textContent = '👁️ Masquer les graphiques';
-                updateCharts();
-            } else {
-                container.style.display = 'none';
-                button.textContent = '👁️ Afficher les graphiques';
-            }
-        }
-
-        // Mettre à jour tous les graphiques
-        function updateCharts() {
-            drawStatusChart();
-            drawRatingChart();
-            drawEvolutionChart();
-            updateYearlyProgress();
-        }
-
-        // Graphique en camembert - Répartition des statuts
-        function drawStatusChart() {
-            const canvas = document.getElementById('statusChart');
-            const ctx = canvas.getContext('2d');
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radius = Math.min(centerX, centerY) - 40;
-
-            // Données
-            const toRead = books.filter(b => b.status === 'to-read').length;
-            const reading = books.filter(b => b.status === 'reading').length;
-            const read = books.filter(b => b.status === 'read').length;
-            const total = books.length;
-
-            if (total === 0) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // État vide élégant
-                ctx.fillStyle = '#f1f5f9';
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, radius - 20, 0, 2 * Math.PI);
-                ctx.fill();
-                
-                ctx.fillStyle = '#94a3b8';
-                ctx.font = 'bold 16px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('📚', centerX, centerY - 10);
-                ctx.font = '12px Arial';
-                ctx.fillText('Aucun livre', centerX, centerY + 15);
-                return;
-            }
-
-            // Couleurs
-            const colors = ['#fbbf24', '#3b82f6', '#10b981'];
-            const labels = ['À lire', 'En cours', 'Lus'];
-            const values = [toRead, reading, read];
-
-            // Dessiner le camembert avec anti-aliasing
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Ombre portée douce
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-            ctx.shadowBlur = 8;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
-            
-            let currentAngle = -Math.PI / 2; // Commencer en haut
-
-            values.forEach((value, index) => {
-                if (value > 0) {
-                    const sliceAngle = (value / total) * 2 * Math.PI;
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(centerX, centerY);
-                    ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
-                    ctx.closePath();
-                    ctx.fillStyle = colors[index];
-                    ctx.fill();
-                    
-                    // Bordure blanche plus fine
-                    ctx.shadowColor = 'transparent';
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-
-                    currentAngle += sliceAngle;
-                }
-            });
-            
-            // Reset shadow
-            ctx.shadowColor = 'transparent';
-
-            // Étiquettes intégrées dans le camembert
-            currentAngle = -Math.PI / 2; // Même point de départ
-            values.forEach((value, index) => {
-                if (value > 0) {
-                    const sliceAngle = (value / total) * 2 * Math.PI;
-                    const middleAngle = currentAngle + sliceAngle / 2;
-                    
-                    // Position de l'étiquette (à l'extérieur du cercle)
-                    const labelRadius = radius + 25;
-                    const labelX = centerX + Math.cos(middleAngle) * labelRadius;
-                    const labelY = centerY + Math.sin(middleAngle) * labelRadius;
-                    
-                    // Ligne de liaison plus élégante
-                    const lineStart = radius + 5;
-                    const lineEnd = radius + 20;
-                    
-                    ctx.strokeStyle = colors[index];
-                    ctx.lineWidth = 2;
-                    ctx.lineCap = 'round';
-                    ctx.beginPath();
-                    ctx.moveTo(centerX + Math.cos(middleAngle) * lineStart, centerY + Math.sin(middleAngle) * lineStart);
-                    ctx.lineTo(centerX + Math.cos(middleAngle) * lineEnd, centerY + Math.sin(middleAngle) * lineEnd);
-                    ctx.stroke();
-                    
-                    // Étiquette avec fond arrondi
-                    const text = `${labels[index]} (${value})`;
-                    ctx.font = 'bold 10px Arial';
-                    
-                    // Alignement intelligent
-                    const isLeft = middleAngle > Math.PI/2 && middleAngle < 3*Math.PI/2;
-                    ctx.textAlign = isLeft ? 'right' : 'left';
-                    
-                    // Fond arrondi pour l'étiquette
-                    const textWidth = ctx.measureText(text).width;
-                    const textHeight = 14;
-                    const padding = 4;
-                    const bgX = isLeft ? labelX - textWidth - padding : labelX - padding;
-                    const bgY = labelY - textHeight/2 - padding/2;
-                    
-                    // Fond avec bordure arrondie
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-                    ctx.beginPath();
-                    ctx.roundRect(bgX, bgY, textWidth + padding*2, textHeight + padding, 6);
-                    ctx.fill();
-                    
-                    ctx.strokeStyle = colors[index];
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
-                    
-                    // Texte
-                    ctx.fillStyle = colors[index];
-                    ctx.fillText(text, labelX, labelY + 3);
-                    
-                    currentAngle += sliceAngle;
-                }
-            });
-        }
-
-        // Graphique en barres - Distribution des notes
-        function drawRatingChart() {
-            const canvas = document.getElementById('ratingChart');
-            const ctx = canvas.getContext('2d');
-            const ratedBooks = books.filter(b => b.rating > 0);
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            if (ratedBooks.length === 0) {
-                // État vide élégant
-                ctx.fillStyle = '#f1f5f9';
-                ctx.beginPath();
-                ctx.roundRect(canvas.width/2 - 60, canvas.height/2 - 25, 120, 50, 10);
-                ctx.fill();
-                
-                ctx.fillStyle = '#94a3b8';
-                ctx.font = 'bold 14px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('⭐', canvas.width / 2, canvas.height / 2 - 5);
-                ctx.font = '11px Arial';
-                ctx.fillText('Aucune note attribuée', canvas.width / 2, canvas.height / 2 + 12);
-                return;
-            }
-
-            // Compter les notes
-            const ratingCounts = [0, 0, 0, 0, 0];
-            ratedBooks.forEach(book => {
-                if (book.rating >= 1 && book.rating <= 5) {
-                    ratingCounts[book.rating - 1]++;
-                }
-            });
-
-            // Version simple et épurée
-            const maxCount = Math.max(...ratingCounts) || 1;
-            const spacing = canvas.width / 6;
-            const maxBarHeight = canvas.height - 80;
-
-            ratingCounts.forEach((count, index) => {
-                const x = spacing + index * spacing;
-                const barHeight = count > 0 ? Math.max((count / maxCount) * maxBarHeight, 8) : 0;
-                const y = canvas.height - 50 - barHeight;
-
-                // Ombre portée pour le cercle
-                if (count > 0) {
-                    ctx.shadowColor = 'rgba(59, 130, 246, 0.3)';
-                    ctx.shadowBlur = 6;
-                    ctx.shadowOffsetX = 0;
-                    ctx.shadowOffsetY = 2;
-                }
-
-                // Cercle de fond avec dégradé
-                const gradient = ctx.createRadialGradient(x, canvas.height - 30, 0, x, canvas.height - 30, 18);
-                if (count > 0) {
-                    gradient.addColorStop(0, '#60a5fa');
-                    gradient.addColorStop(1, '#3b82f6');
-                } else {
-                    gradient.addColorStop(0, '#f1f5f9');
-                    gradient.addColorStop(1, '#e2e8f0');
-                }
-                
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(x, canvas.height - 30, 18, 0, 2 * Math.PI);
-                ctx.fill();
-                
-                // Reset shadow
-                ctx.shadowColor = 'transparent';
-
-                // Bordure du cercle
-                ctx.strokeStyle = count > 0 ? '#1e40af' : '#cbd5e1';
-                ctx.lineWidth = count > 0 ? 2 : 1;
-                ctx.stroke();
-
-                // Étoile dans le cercle
-                ctx.fillStyle = count > 0 ? '#ffffff' : '#94a3b8';
-                ctx.font = 'bold 15px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('★', x, canvas.height - 25);
-
-                // Nombre de livres avec fond si > 0
-                if (count > 0) {
-                    // Fond pour le nombre
-                    const text = count.toString();
-                    const textWidth = ctx.measureText(text).width;
-                    
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                    ctx.beginPath();
-                    ctx.roundRect(x - textWidth/2 - 6, y - 20, textWidth + 12, 18, 9);
-                    ctx.fill();
-                    
-                    ctx.strokeStyle = '#3b82f6';
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
-                    
-                    // Nombre
-                    ctx.fillStyle = '#1e40af';
-                    ctx.font = 'bold 14px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(text, x, y - 8);
-                    
-                    // Ligne de liaison élégante
-                    ctx.strokeStyle = 'rgba(59, 130, 246, 0.4)';
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([3, 2]);
-                    ctx.beginPath();
-                    ctx.moveTo(x, y - 2);
-                    ctx.lineTo(x, canvas.height - 48);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-                }
-
-                // Label de la note sous l'étoile
-                ctx.fillStyle = '#64748b';
-                ctx.font = 'bold 10px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText((index + 1).toString(), x, canvas.height - 8);
-            });
-        }
-
-        // Graphique linéaire - Évolution mensuelle  
-        function drawEvolutionChart() {
-            const canvas = document.getElementById('evolutionChart');
-            const ctx = canvas.getContext('2d');
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            if (books.length === 0) {
-                // État vide avec style
-                ctx.fillStyle = '#f8fafc';
-                ctx.fillRect(canvas.width/2 - 70, canvas.height/2 - 20, 140, 40);
-                ctx.strokeStyle = '#e2e8f0';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(canvas.width/2 - 70, canvas.height/2 - 20, 140, 40);
-                
-                ctx.fillStyle = '#94a3b8';
-                ctx.font = 'bold 14px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('📈', canvas.width / 2, canvas.height / 2 - 2);
-                ctx.font = '11px Arial';
-                ctx.fillText('Aucune donnée', canvas.width / 2, canvas.height / 2 + 12);
-                return;
-            }
-
-            // Calculer les données par mois (6 derniers mois)
-            const monthlyData = {};
-            const now = new Date();
-            
-            for (let i = 5; i >= 0; i--) {
-                const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                const key = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-                monthlyData[key] = 0;
-            }
-
-            books.forEach(book => {
-                const [day, month, year] = book.addedDate.split('/');
-                const key = `${year}-${month}`;
-                if (monthlyData.hasOwnProperty(key)) {
-                    monthlyData[key]++;
-                }
-            });
-
-            const months = Object.keys(monthlyData);
-            const values = Object.values(monthlyData);
-            const maxValue = Math.max(...values) || 1;
-
-            // Design moderne sans axes visibles
-            const chartArea = {
-                left: 50,
-                right: canvas.width - 30,
-                top: 30,
-                bottom: canvas.height - 50
-            };
-
-            // Grille discrète en arrière-plan
-            const steps = Math.min(maxValue, 4);
-            for (let i = 0; i <= steps; i++) {
-                const value = Math.round((maxValue / steps) * i);
-                const y = chartArea.bottom - (i / steps * (chartArea.bottom - chartArea.top));
-                
-                // Lignes de grille très subtiles
-                if (i > 0) {
-                    ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)';
-                    ctx.setLineDash([3, 3]);
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(chartArea.left, y);
-                    ctx.lineTo(chartArea.right, y);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-                }
-                
-                // Labels Y élégants
-                if (value > 0) {
-                    ctx.fillStyle = '#94a3b8';
-                    ctx.font = 'bold 11px Arial';
-                    ctx.textAlign = 'right';
-                    ctx.fillText(value.toString(), chartArea.left - 10, y + 3);
-                }
-            }
-
-            // Zone sous la courbe (gradient)
-            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
-            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.05)');
-
-            ctx.beginPath();
-            values.forEach((value, index) => {
-                const x = chartArea.left + (index * (chartArea.right - chartArea.left) / (months.length - 1));
-                const y = chartArea.bottom - (value / maxValue * (chartArea.bottom - chartArea.top));
-                
-                if (index === 0) {
-                    ctx.moveTo(x, chartArea.bottom);
-                    ctx.lineTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            });
-            ctx.lineTo(chartArea.right, chartArea.bottom);
-            ctx.closePath();
-            ctx.fillStyle = gradient;
-            ctx.fill();
-
-            // Courbe principale avec effet de brillance
-            ctx.strokeStyle = '#3b82f6';
-            ctx.lineWidth = 3;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.beginPath();
-
-            values.forEach((value, index) => {
-                const x = chartArea.left + (index * (chartArea.right - chartArea.left) / (months.length - 1));
-                const y = chartArea.bottom - (value / maxValue * (chartArea.bottom - chartArea.top));
-                
-                if (index === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            });
-
-            ctx.stroke();
-
-            // Points avec effet moderne
-            values.forEach((value, index) => {
-                const x = chartArea.left + (index * (chartArea.right - chartArea.left) / (months.length - 1));
-                const y = chartArea.bottom - (value / maxValue * (chartArea.bottom - chartArea.top));
-                
-                // Halo du point
-                ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
-                ctx.beginPath();
-                ctx.arc(x, y, 8, 0, 2 * Math.PI);
-                ctx.fill();
-                
-                // Point principal
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(x, y, 4, 0, 2 * Math.PI);
-                ctx.fill();
-                
-                // Bordure du point
-                ctx.strokeStyle = '#3b82f6';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(x, y, 4, 0, 2 * Math.PI);
-                ctx.stroke();
-
-                // Valeur au-dessus du point si > 0
-                if (value > 0) {
-                    ctx.fillStyle = '#374151';
-                    ctx.font = 'bold 11px Arial';
-                    ctx.textAlign = 'center';
-                    
-                    // Fond blanc pour le nombre
-                    const text = value.toString();
-                    const textWidth = ctx.measureText(text).width;
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                    ctx.fillRect(x - textWidth/2 - 3, y - 20, textWidth + 6, 16);
-                    ctx.strokeStyle = '#e2e8f0';
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(x - textWidth/2 - 3, y - 20, textWidth + 6, 16);
-                    
-                    ctx.fillStyle = '#374151';
-                    ctx.fillText(text, x, y - 8);
-                }
-            });
-
-            // Labels des mois avec style moderne
-            ctx.fillStyle = '#64748b';
-            ctx.font = 'bold 10px Arial';
-            ctx.textAlign = 'center';
-            const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
-            
-            months.forEach((month, index) => {
-                const x = chartArea.left + (index * (chartArea.right - chartArea.left) / (months.length - 1));
-                const monthNum = parseInt(month.split('-')[1]) - 1;
-                const monthLabel = monthNames[monthNum] || month.split('-')[1];
-                
-                // Petite ligne verticale
-                ctx.strokeStyle = 'rgba(148, 163, 184, 0.5)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(x, chartArea.bottom);
-                ctx.lineTo(x, chartArea.bottom + 5);
-                ctx.stroke();
-                
-                ctx.fillText(monthLabel, x, chartArea.bottom + 18);
-            });
-        }
-
-        // Objectif annuel avec design moderne
-        function updateYearlyProgress() {
-            const currentYear = new Date().getFullYear();
-            const booksThisYear = books.filter(book => {
-                const bookYear = parseInt(book.addedDate.split('/')[2]);
-                return bookYear === currentYear;
-            }).length;
-
-            const target = 24; // Objectif par défaut
-            const percentage = Math.min((booksThisYear / target) * 100, 100);
-            const isCompleted = percentage >= 100;
-
-            // Animation de la barre
-            const progressBar = document.getElementById('yearlyProgress');
-            progressBar.style.width = `${percentage}%`;
-            
-            // Couleur dynamique selon le progrès
-            if (percentage >= 100) {
-                progressBar.style.background = 'linear-gradient(90deg, #16a34a, #22c55e)';
-                progressBar.classList.add('completed');
-            } else if (percentage >= 75) {
-                progressBar.style.background = 'linear-gradient(90deg, #eab308, #facc15)';
-            } else if (percentage >= 50) {
-                progressBar.style.background = 'linear-gradient(90deg, #f97316, #fb923c)';
-            } else {
-                progressBar.style.background = 'linear-gradient(90deg, #3b82f6, #60a5fa)';
-            }
-
-            // Texte avec émojis et encouragement
-            let encouragement = '';
-            let emoji = '';
-            
-            if (percentage >= 100) {
-                encouragement = 'Objectif atteint ! 🎉';
-                emoji = '🏆';
-            } else if (percentage >= 75) {
-                encouragement = 'Excellent progrès !';
-                emoji = '🔥';
-            } else if (percentage >= 50) {
-                encouragement = 'À mi-chemin !';
-                emoji = '📚';
-            } else if (percentage >= 25) {
-                encouragement = 'Bon début !';
-                emoji = '🌱';
-            } else {
-                encouragement = 'Continuez !';
-                emoji = '💪';
-            }
-
-            const progressContainer = document.querySelector('.progress-container');
-            progressContainer.innerHTML = `
-                <div class="progress-header">
-                    <span class="progress-emoji">${emoji}</span>
-                    <div class="progress-info">
-                        <div class="progress-main">${booksThisYear} / ${target} livres</div>
-                        <div class="progress-sub">${encouragement}</div>
-                    </div>
-                    <div class="progress-percent">${Math.round(percentage)}%</div>
-                </div>
-                
-                <div class="progress-bar-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="yearlyProgress" style="width: ${percentage}%">
-                            <div class="progress-shine"></div>
-                        </div>
-                    </div>
-                    <div class="progress-markers">
-                        ${Array.from({length: 4}, (_, i) => {
-                            const milestone = (i + 1) * (target / 4);
-                            const reached = booksThisYear >= milestone;
-                            return `<div class="milestone ${reached ? 'reached' : ''}" style="left: ${(milestone / target) * 100}%">
-                                <div class="milestone-dot"></div>
-                                <div class="milestone-label">${milestone}</div>
-                            </div>`;
-                        }).join('')}
-                    </div>
-                </div>
-                
-                <div class="progress-stats">
-                    <div class="stat-item">
-                        <span class="stat-value">${Math.max(0, target - booksThisYear)}</span>
-                        <span class="stat-label">Restants</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">${booksThisYear > 0 ? Math.round(365 / booksThisYear * (target - booksThisYear)) : '∞'}</span>
-                        <span class="stat-label">Jours restants</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">${new Date().getMonth() + 1}/12</span>
-                        <span class="stat-label">Mois écoulés</span>
-                    </div>
-                </div>
-            `;
-
-            // Re-appliquer les styles de couleur
-            const newProgressBar = document.getElementById('yearlyProgress');
-            if (percentage >= 100) {
-                newProgressBar.style.background = 'linear-gradient(90deg, #16a34a, #22c55e)';
-            } else if (percentage >= 75) {
-                newProgressBar.style.background = 'linear-gradient(90deg, #eab308, #facc15)';
-            } else if (percentage >= 50) {
-                newProgressBar.style.background = 'linear-gradient(90deg, #f97316, #fb923c)';
-            } else {
-                newProgressBar.style.background = 'linear-gradient(90deg, #3b82f6, #60a5fa)';
-            }
-        }
-
-        // Statistiques
-        function updateStats() {
-            document.getElementById('totalBooks').textContent = books.length;
-            document.getElementById('readBooks').textContent = books.filter(b => b.status === 'read').length;
-            document.getElementById('currentlyReading').textContent = books.filter(b => b.status === 'reading').length;
-            document.getElementById('toReadBooks').textContent = books.filter(b => b.status === 'to-read').length;
-            
-            // Calculer la note moyenne
-            const ratedBooks = books.filter(b => b.status === 'read' && b.rating > 0);
-            if (ratedBooks.length > 0) {
-                const average = ratedBooks.reduce((sum, book) => sum + book.rating, 0) / ratedBooks.length;
-                document.getElementById('averageRating').textContent = `${renderStars(Math.round(average))} (${average.toFixed(1)})`;
-            } else {
-                document.getElementById('averageRating').textContent = '-';
-            }
-            
-            // Mettre à jour les graphiques si ils sont visibles
-            const chartsContainer = document.getElementById('chartsContainer');
-            if (chartsContainer && chartsContainer.style.display !== 'none') {
-                updateCharts();
-            }
-        }
-
-        // Export
-        function exportLibrary() {
-            const dataStr = JSON.stringify(books, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            const url = URL.createObjectURL(dataBlob);
-            
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `ma-bibliotheque-${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            
-            URL.revokeObjectURL(url);
-            showMessage('📤 Bibliothèque exportée !', 'success');
-        }
-
-        function isValidISBN(isbn) {
-            console.log('🔍 Validation ISBN (mode debug):', isbn);
-            
-            // Pour debug: accepter tout code de 10+ caractères
-            const cleanISBN = isbn.replace(/[-\s]/g, '');
-            
-            if (cleanISBN.length >= 10) {
-                console.log('✅ Code accepté (debug mode):', cleanISBN);
-                return true;
-            }
-            
-            console.log('❌ Code trop court:', cleanISBN);
-            return false;
-        }
-
-        // Messages
-        function showMessage(text, type = 'info') {
-            const message = elements.message;
-            message.className = type;
-            message.textContent = text;
-            message.style.display = 'block';
-            
-            setTimeout(() => {
-                message.style.display = 'none';
-            }, 4000);
-        }
-    </script>
-
-    <!-- Modal Scanner -->
-    <!-- Version -->
-    <footer class="version-footer">
-        <span class="version-text">📚 Ma Bibliothèque v0.4.0</span>
-        <span class="version-date">• Décembre 2025</span>
-    </footer>
 </body>
 </html>
