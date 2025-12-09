@@ -34,6 +34,7 @@ function handleAddBook(event) {
         rating,
         summary,
         learnings,
+        currentPage: 0,
         addedDate: new Date().toLocaleDateString('fr-FR')
     };
 
@@ -84,14 +85,17 @@ function displayBooks() {
                 <h3>${book.title}</h3>
                 <p class="book-author">${book.author}</p>
                 ${book.isbn ? `<p class="book-isbn">ISBN: ${book.isbn}</p>` : ''}
-                <div class="book-status">
-                    <span class="status-badge status-${book.status}" onclick="editBookStatus(${book.id})">${getStatusLabel(book.status)}</span>
+                <div class="book-status" style="cursor: pointer;" onclick="editBookStatus(${book.id})" title="Cliquer pour changer le statut">
+                    <span class="status-badge status-${book.status}">${getStatusLabel(book.status)}</span>
                 </div>
-                <div class="book-rating">
-                    <div class="stars" onclick="editBookRating(${book.id})">
-                        ${renderStars(book.rating)}
+                <div class="book-rating" style="margin: 8px 0;">
+                    <div class="stars interactive-stars" data-book-id="${book.id}">
+                        ${renderInteractiveStars(book.rating, book.id)}
                     </div>
+                    ${book.rating > 0 ? `<small style="color: #64748b;">${book.rating}/5</small>` : '<small style="color: #94a3b8;">Cliquer sur une étoile</small>'}
                 </div>
+                ${book.pages ? renderProgressBar(book) : ''}
+                ${book.summary ? `<p class="book-summary" style="font-size: 0.85rem; color: #64748b; margin: 8px 0; line-height: 1.4;">${book.summary.substring(0, 100)}${book.summary.length > 100 ? '...' : ''}</p>` : ''}
                 <div class="book-actions">
                     <button class="view-btn" onclick="viewBookDetails(${book.id})">👁️ Détails</button>
                     <button class="delete-btn" onclick="deleteBook(${book.id})">🗑️</button>
@@ -270,6 +274,47 @@ function renderStars(rating) {
     ).join('');
 }
 
+function renderInteractiveStars(currentRating, bookId) {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+        const filled = i <= currentRating;
+        stars += `<span class="star-clickable" 
+                       data-rating="${i}" 
+                       onclick="setBookRating(${bookId}, ${i})"
+                       style="cursor: pointer; font-size: 20px; transition: transform 0.2s;"
+                       onmouseover="this.style.transform='scale(1.2)'"
+                       onmouseout="this.style.transform='scale(1)'"
+                       title="Noter ${i}/5">${filled ? '⭐' : '☆'}</span>`;
+    }
+    return stars;
+}
+
+function renderProgressBar(book) {
+    const totalPages = parseInt(book.pages) || 0;
+    const currentPage = parseInt(book.currentPage) || 0;
+    const percentage = totalPages > 0 ? Math.min(100, Math.round((currentPage / totalPages) * 100)) : 0;
+    
+    return `
+        <div class="book-progress" style="margin: 12px 0;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <input type="number" 
+                       value="${currentPage}" 
+                       min="0" 
+                       max="${totalPages}"
+                       placeholder="Page"
+                       onchange="updateBookProgress(${book.id}, this.value)"
+                       style="width: 70px; padding: 4px 8px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;"
+                       title="Page actuelle" />
+                <span style="color: #64748b; font-size: 13px;">/ ${totalPages} pages</span>
+                <span style="color: #3b82f6; font-weight: 600; font-size: 13px; margin-left: auto;">${percentage}%</span>
+            </div>
+            <div class="progress-bar-container" style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                <div class="progress-bar-fill" style="width: ${percentage}%; height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); transition: width 0.3s ease;"></div>
+            </div>
+        </div>
+    `;
+}
+
 function editBookStatus(bookId) {
     const book = books.find(b => b.id === bookId);
     if (!book) return;
@@ -284,6 +329,53 @@ function editBookStatus(bookId) {
     updateStats();
     updateHomePage();
     showMessage(`📌 Statut: ${getStatusLabel(book.status)}`, 'info');
+}
+
+function setBookRating(bookId, rating) {
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+
+    book.rating = rating;
+    saveBooks();
+    displayBooks();
+    updateStats();
+    updateHomePage();
+    showMessage(`⭐ ${rating}/5`, 'success');
+}
+
+function updateBookProgress(bookId, currentPage) {
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+
+    const page = parseInt(currentPage) || 0;
+    const totalPages = parseInt(book.pages) || 0;
+    
+    if (page > totalPages) {
+        showMessage('⚠️ La page ne peut pas dépasser le total', 'warning');
+        displayBooks();
+        return;
+    }
+
+    book.currentPage = page;
+    
+    // Si le lecteur atteint la dernière page, marquer comme "Lu"
+    if (page === totalPages && totalPages > 0 && book.status !== 'read') {
+        book.status = 'read';
+        showMessage(`🎉 Livre terminé ! Statut mis à jour: Lu`, 'success');
+    } else if (page > 0 && book.status === 'to-read') {
+        // Si le lecteur commence à lire, passer en "En cours"
+        book.status = 'reading';
+    }
+
+    saveBooks();
+    displayBooks();
+    updateStats();
+    updateHomePage();
+    
+    const percentage = totalPages > 0 ? Math.round((page / totalPages) * 100) : 0;
+    if (page < totalPages) {
+        showMessage(`📖 Progression: ${percentage}%`, 'info');
+    }
 }
 
 function editBookRating(bookId) {
@@ -304,7 +396,7 @@ function editBookRating(bookId) {
     displayBooks();
     updateStats();
     updateHomePage();
-    showMessage(`⭐ Note: ${rating}/5`, 'success');
+    showMessage(`⭐ Note mise à jour: ${rating}/5`, 'success');
 }
 
 function viewBookDetails(bookId) {

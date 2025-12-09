@@ -118,9 +118,16 @@ function createBookCard(book) {
             <h3>${book.title}</h3>
             <p class="book-author">${book.author}</p>
             ${book.isbn ? `<p class="book-isbn">ISBN: ${book.isbn}</p>` : ''}
-            <div class="book-status">
-                <span class="status-badge status-${book.status}" onclick="editBookStatus(${book.id})">${getStatusLabel(book.status)}</span>
+            <div class="book-status" style="cursor: pointer;" onclick="editBookStatus(${book.id})" title="Cliquer pour changer le statut">
+                <span class="status-badge status-${book.status}">${getStatusLabel(book.status)}</span>
             </div>
+            <div class="book-rating" style="margin: 8px 0;">
+                <div class="stars interactive-stars" data-book-id="${book.id}">
+                    ${renderInteractiveStars(book.rating, book.id)}
+                </div>
+                ${book.rating > 0 ? `<small style="color: #64748b;">${book.rating}/5</small>` : '<small style="color: #94a3b8;">Cliquer sur une étoile</small>'}
+            </div>
+            ${book.pages ? renderProgressBar(book) : ''}
         </div>
     `;
     return card;

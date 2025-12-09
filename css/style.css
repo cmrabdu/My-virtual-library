@@ -834,6 +834,29 @@ body {
     font-size: 0.75rem;
 }
 
+/* Zones cliquables pour édition */
+.book-status:hover .status-badge {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.book-rating:hover {
+    transform: scale(1.02);
+}
+
+.status-badge {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.book-rating {
+    transition: all 0.2s ease;
+}
+
+.stars {
+    display: inline-block;
+}
+
 /* Responsive mobile */
 @media (max-width: 768px) {
     .page {
