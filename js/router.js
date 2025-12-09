@@ -45,6 +45,13 @@ function navigateTo(pageName) {
 }
 
 function updateHomePage() {
+    // Afficher le nom d'utilisateur
+    const homeUserName = document.getElementById('homeUserName');
+    if (homeUserName) {
+        const userName = localStorage.getItem('userName');
+        homeUserName.textContent = userName || 'Lecteur';
+    }
+
     // Livres en cours
     const readingBooks = books.filter(b => b.status === 'reading').slice(0, 3);
     const currentReadingList = document.getElementById('currentReadingList');
@@ -61,6 +68,12 @@ function updateHomePage() {
         }
     }
 
+    // Top du mois
+    updateTopOfMonth();
+
+    // Recommandations
+    updateRecommendations();
+
     // Derniers ajouts
     const recentBooks = [...books].sort((a, b) => b.id - a.id).slice(0, 6);
     const recentBooksList = document.getElementById('recentBooksList');
@@ -76,6 +89,124 @@ function updateHomePage() {
             });
         }
     }
+}
+
+function updateTopOfMonth() {
+    const topMonthSection = document.getElementById('topMonthSection');
+    const topMonthList = document.getElementById('topMonthList');
+    
+    if (!topMonthSection || !topMonthList) return;
+
+    // Obtenir le mois actuel
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    // Filtrer les livres lus ce mois avec une note
+    const thisMonthBooks = books.filter(book => {
+        if (book.status !== 'read' || !book.rating || book.rating === 0) return false;
+        
+        // Vérifier si ajouté ce mois (approximation via addedDate)
+        if (book.addedDate) {
+            const parts = book.addedDate.split('/');
+            if (parts.length === 3) {
+                const bookMonth = parseInt(parts[1]) - 1; // Mois en JS commence à 0
+                const bookYear = parseInt(parts[2]);
+                return bookMonth === currentMonth && bookYear === currentYear;
+            }
+        }
+        return false;
+    });
+
+    // Trier par note décroissante
+    const topBooks = thisMonthBooks.sort((a, b) => b.rating - a.rating).slice(0, 3);
+
+    if (topBooks.length === 0) {
+        topMonthSection.style.display = 'none';
+    } else {
+        topMonthSection.style.display = 'block';
+        topMonthList.innerHTML = '';
+        topBooks.forEach(book => {
+            const card = createBookCard(book);
+            topMonthList.appendChild(card);
+        });
+    }
+}
+
+function updateRecommendations() {
+    const recommendationsSection = document.getElementById('recommendationsSection');
+    const recommendationsList = document.getElementById('recommendationsList');
+    
+    if (!recommendationsSection || !recommendationsList) return;
+
+    // Trouver les livres 5 étoiles pour base de recommandation
+    const favoriteBooks = books.filter(b => b.rating === 5).slice(0, 2);
+
+    if (favoriteBooks.length === 0) {
+        recommendationsSection.style.display = 'none';
+        return;
+    }
+
+    recommendationsSection.style.display = 'block';
+    recommendationsList.innerHTML = '<div class="loading"><div class="spinner"></div>Recherche de recommandations...</div>';
+
+    // Prendre le premier livre 5 étoiles pour chercher des similaires
+    const baseBook = favoriteBooks[0];
+    const searchQuery = `${baseBook.author} ${baseBook.title.split(' ').slice(0, 2).join(' ')}`;
+
+    searchBooksByQuery(searchQuery, 40)
+        .then(results => {
+            // Filtrer pour ne pas recommander les livres déjà dans la bibliothèque
+            const existingIsbns = books.map(b => b.isbn).filter(isbn => isbn);
+            const recommendations = results
+                .filter(book => !existingIsbns.includes(book.isbn))
+                .slice(0, 6);
+
+            if (recommendations.length === 0) {
+                recommendationsList.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">Aucune recommandation disponible pour le moment</p>';
+                return;
+            }
+
+            recommendationsList.innerHTML = '';
+            recommendations.forEach(book => {
+                const card = createRecommendationCard(book);
+                recommendationsList.appendChild(card);
+            });
+        })
+        .catch(error => {
+            console.error('Erreur recommandations:', error);
+            recommendationsList.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">Erreur lors du chargement des recommandations</p>';
+        });
+}
+
+function createRecommendationCard(book) {
+    const card = document.createElement('div');
+    card.className = 'book-card recommendation-card';
+    card.innerHTML = `
+        ${renderBookCover(book)}
+        <div class="book-info">
+            <h3>${book.title}</h3>
+            <p class="book-author">${book.author}</p>
+            ${book.pages ? `<p class="book-pages">${book.pages} pages</p>` : ''}
+            <button class="btn btn-small btn-primary" onclick="addBookFromRecommendation('${book.isbn || ''}', '${book.title.replace(/'/g, "\\'")}', '${book.author.replace(/'/g, "\\'")}', '${book.pages || ''}', '${book.cover}')">
+                ➕ Ajouter
+            </button>
+        </div>
+    `;
+    return card;
+}
+
+function addBookFromRecommendation(isbn, title, author, pages, cover) {
+    CONFIG.tempCoverUrl = cover;
+    navigateTo('add');
+    
+    setTimeout(() => {
+        document.getElementById('isbn').value = isbn;
+        document.getElementById('title').value = title;
+        document.getElementById('author').value = author;
+        document.getElementById('pages').value = pages;
+        showMessage('💡 Recommandation ajoutée au formulaire !', 'info');
+    }, 100);
 }
 
 function updateProfilePage() {
@@ -110,7 +241,7 @@ function createBookCard(book) {
     card.className = 'book-card';
     card.innerHTML = `
         <div class="book-cover-wrapper">
-            <img src="${book.cover}" alt="${book.title}" class="book-cover" onerror="this.src='https://via.placeholder.com/128x192?text=Livre'">
+            ${renderBookCover(book)}
             ${book.rating > 0 ? `<div class="book-rating-badge">${'★'.repeat(book.rating)}</div>` : ''}
         </div>
         <div class="book-info">
@@ -159,6 +290,13 @@ function initRouter() {
             localStorage.setItem('yearlyGoal', yearlyGoal);
 
             updateProfilePage();
+            
+            // Mettre à jour le nom sur la page d'accueil
+            const homeUserName = document.getElementById('homeUserName');
+            if (homeUserName) {
+                homeUserName.textContent = userName || 'Lecteur';
+            }
+            
             showMessage('✅ Paramètres sauvegardés !', 'success');
         });
     }
@@ -259,6 +397,12 @@ function initSearchPage() {
         chip.addEventListener('click', () => {
             filterChips.forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
+            
+            // Re-lancer la recherche si une requête existe
+            const searchInput = document.getElementById('globalSearchInput');
+            if (searchInput && searchInput.value.trim()) {
+                performGlobalSearch();
+            }
         });
     });
 }
@@ -283,36 +427,55 @@ function performGlobalSearch() {
 
     resultsContainer.innerHTML = '<div class="loading"><div class="spinner"></div>Recherche en cours...</div>';
 
-    // Recherche via Google Books API
-    searchGoogleBooks(query)
-        .then(results => {
-            displaySearchResults(results, resultsContainer);
+    // Construire la requête selon le filtre
+    let searchQuery = query;
+    if (activeFilter === 'books') {
+        searchQuery = `intitle:${query}`; // Recherche uniquement dans les titres
+    } else if (activeFilter === 'authors') {
+        searchQuery = `inauthor:${query}`; // Recherche uniquement dans les auteurs
+    }
+
+    // Réinitialiser la pagination
+    CONFIG.currentSearchQuery = searchQuery;
+    CONFIG.currentSearchFilter = activeFilter;
+    CONFIG.currentSearchStartIndex = 0;
+
+    // Recherche via Google Books API (première page)
+    searchBooksByQueryPaginated(searchQuery, 0)
+        .then(data => {
+            displaySearchResults(data.books, resultsContainer, true, data.hasMore);
         })
         .catch(error => {
+            console.error('Erreur recherche globale:', error);
             resultsContainer.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #64748b;">
                     <p>❌ Erreur lors de la recherche</p>
-                    <p style="font-size: 14px;">${error.message}</p>
+                    <p style="font-size: 14px;">Veuillez réessayer</p>
                 </div>
             `;
         });
 }
 
-function displaySearchResults(results, container) {
+function displaySearchResults(results, container, isNewSearch = false, hasMore = false) {
     if (!results || results.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #64748b;">
-                <p>📭 Aucun résultat trouvé</p>
-                <p style="font-size: 14px;">Essayez avec d'autres mots-clés</p>
-            </div>
-        `;
+        if (isNewSearch) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #64748b;">
+                    <p>📭 Aucun résultat trouvé</p>
+                    <p style="font-size: 14px;">Essayez avec d'autres mots-clés</p>
+                </div>
+            `;
+        }
         return;
     }
 
-    container.innerHTML = '<div class="search-results-grid"></div>';
+    if (isNewSearch) {
+        container.innerHTML = '<div class="search-results-grid"></div>';
+    }
+    
     const grid = container.querySelector('.search-results-grid');
 
-    results.slice(0, 12).forEach(book => {
+    results.forEach(book => {
         const resultCard = document.createElement('div');
         resultCard.className = 'search-result-card';
         resultCard.innerHTML = `
@@ -328,6 +491,50 @@ function displaySearchResults(results, container) {
         `;
         grid.appendChild(resultCard);
     });
+
+    // Ajouter ou mettre à jour le bouton "Charger plus"
+    let loadMoreBtn = container.querySelector('.load-more-btn');
+    
+    if (hasMore) {
+        if (!loadMoreBtn) {
+            loadMoreBtn = document.createElement('button');
+            loadMoreBtn.className = 'btn btn-secondary load-more-btn';
+            loadMoreBtn.textContent = '📚 Charger plus de résultats';
+            loadMoreBtn.style.cssText = 'width: 100%; margin-top: 20px; padding: 14px;';
+            loadMoreBtn.onclick = loadMoreSearchResults;
+            container.appendChild(loadMoreBtn);
+        }
+    } else if (loadMoreBtn) {
+        loadMoreBtn.remove();
+    }
+}
+
+function loadMoreSearchResults() {
+    const resultsContainer = document.getElementById('searchResults');
+    const loadMoreBtn = resultsContainer.querySelector('.load-more-btn');
+    
+    if (loadMoreBtn) {
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.innerHTML = '<div class="spinner" style="display: inline-block; width: 16px; height: 16px;"></div> Chargement...';
+    }
+
+    CONFIG.currentSearchStartIndex += 40;
+
+    searchBooksByQueryPaginated(CONFIG.currentSearchQuery, CONFIG.currentSearchStartIndex)
+        .then(data => {
+            if (loadMoreBtn) {
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.textContent = '📚 Charger plus de résultats';
+            }
+            displaySearchResults(data.books, resultsContainer, false, data.hasMore);
+        })
+        .catch(error => {
+            console.error('Erreur chargement résultats:', error);
+            if (loadMoreBtn) {
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.textContent = '❌ Erreur - Réessayer';
+            }
+        });
 }
 
 function addBookFromSearch(isbn, title, author, pages, cover) {

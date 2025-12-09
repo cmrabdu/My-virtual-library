@@ -68,6 +68,21 @@ function displayBooks() {
     if (loading) loading.style.display = 'none';
     if (emptyState) emptyState.style.display = 'none';
 
+    // Mise à jour du compteur de livres
+    const libraryCount = document.getElementById('libraryCount');
+    if (libraryCount) {
+        const count = books.length;
+        libraryCount.textContent = `${count} livre${count > 1 ? 's' : ''}`;
+    }
+
+    // Mise à jour des statistiques rapides
+    const toReadCount = document.getElementById('toReadCount');
+    const readingCount = document.getElementById('readingCount');
+    const readCount = document.getElementById('readCount');
+    if (toReadCount) toReadCount.textContent = books.filter(b => b.status === 'to-read').length;
+    if (readingCount) readingCount.textContent = books.filter(b => b.status === 'reading').length;
+    if (readCount) readCount.textContent = books.filter(b => b.status === 'read').length;
+
     if (filteredBooks.length === 0) {
         if (emptyState) emptyState.style.display = 'block';
         return;
@@ -78,7 +93,7 @@ function displayBooks() {
         bookCard.className = 'book-card';
         bookCard.innerHTML = `
             <div class="book-cover-wrapper">
-                <img src="${book.cover}" alt="${book.title}" class="book-cover" onerror="this.src='https://via.placeholder.com/128x192?text=Livre'">
+                ${renderBookCover(book)}
                 ${book.rating > 0 ? `<div class="book-rating-badge">${'★'.repeat(book.rating)}</div>` : ''}
             </div>
             <div class="book-info">
@@ -193,20 +208,33 @@ function bindEvents() {
         });
     }
 
-    const filterStatus = document.getElementById('filterStatus');
-    if (filterStatus) {
-        filterStatus.addEventListener('change', (e) => {
-            const status = e.target.value;
+    // Gestion des filtres par statut (chips)
+    const statusChips = document.querySelectorAll('.status-chip');
+    statusChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            statusChips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            
+            const status = chip.dataset.status;
             filteredBooks = status ? books.filter(b => b.status === status) : [...books];
             displayBooks();
         });
-    }
+    });
 
     const searchBooks = document.getElementById('searchBooks');
     if (searchBooks) {
         searchBooks.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase();
-            filteredBooks = books.filter(b => 
+            
+            // Récupérer le filtre actif
+            const activeChip = document.querySelector('.status-chip.active');
+            const activeStatus = activeChip ? activeChip.dataset.status : '';
+            
+            // Filtrer d'abord par statut si nécessaire
+            let baseBooks = activeStatus ? books.filter(b => b.status === activeStatus) : [...books];
+            
+            // Puis filtrer par recherche
+            filteredBooks = baseBooks.filter(b => 
                 b.title.toLowerCase().includes(query) || 
                 b.author.toLowerCase().includes(query)
             );
@@ -217,6 +245,23 @@ function bindEvents() {
     const exportBtn = document.getElementById('exportBtn');
     if (exportBtn) {
         exportBtn.addEventListener('click', exportLibrary);
+    }
+
+    const clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (confirm('⚠️ ATTENTION ⚠️\n\nÊtes-vous sûr de vouloir supprimer TOUTE votre bibliothèque ?\n\nCette action est IRRÉVERSIBLE !')) {
+                if (confirm('Dernière confirmation : Supprimer définitivement tous les livres ?')) {
+                    books = [];
+                    filteredBooks = [];
+                    saveBooks();
+                    displayBooks();
+                    updateStats();
+                    updateHomePage();
+                    showMessage('🗑️ Bibliothèque supprimée', 'info');
+                }
+            }
+        });
     }
 
     const starsContainer = document.getElementById('starRating');
@@ -272,6 +317,20 @@ function renderStars(rating) {
     return Array.from({length: 5}, (_, i) => 
         i < rating ? '<span class="star active">★</span>' : '<span class="star">☆</span>'
     ).join('');
+}
+
+function renderBookCover(book) {
+    const hasValidImage = book.cover && 
+                          !book.cover.includes('placeholder') && 
+                          !book.cover.includes('via.placeholder');
+    
+    if (hasValidImage) {
+        return `<img src="${book.cover}" alt="${book.title}" class="book-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
+    } else {
+        // Afficher le titre tronqué dans la couverture
+        const truncatedTitle = book.title.length > 40 ? book.title.substring(0, 40) + '...' : book.title;
+        return `<div class="book-cover book-cover-text">${truncatedTitle}</div>`;
+    }
 }
 
 function renderInteractiveStars(currentRating, bookId) {
