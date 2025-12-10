@@ -204,8 +204,14 @@ function bindEvents() {
             }
             
             searchBtn.disabled = false;
-            searchBtn.textContent = '🔍 Rechercher par ISBN';
+            searchBtn.textContent = '🔍 Rechercher';
         });
+    }
+
+    // Bouton de scan ISBN
+    const scanBtn = document.getElementById('scanBtn');
+    if (scanBtn) {
+        scanBtn.addEventListener('click', handleISBNScan);
     }
 
     // Gestion des filtres par statut (chips)
@@ -495,3 +501,54 @@ function setRating(rating, stars) {
     const ratingInput = document.getElementById('rating');
     if (ratingInput) ratingInput.value = rating;
 }
+
+/**
+ * Handle ISBN scanning from camera
+ */
+async function handleISBNScan() {
+    const cameraInput = document.getElementById('cameraInput');
+    const scanBtn = document.getElementById('scanBtn');
+    const isbnInput = document.getElementById('isbn');
+    
+    if (!cameraInput || !scanBtn || !isbnInput) return;
+    
+    // Trigger camera input
+    cameraInput.click();
+    
+    cameraInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        // Show loading state
+        const originalText = scanBtn.innerHTML;
+        scanBtn.innerHTML = '⏳ Analyse...';
+        scanBtn.disabled = true;
+        
+        try {
+            console.log('Scanning file:', file.name, file.type);
+            const isbn = await scanBarcodeFromImage(file);
+            
+            if (isbn) {
+                isbnInput.value = isbn;
+                showMessage('✅ Code-barres détecté: ' + isbn, 'success');
+                
+                // Auto-trigger search
+                setTimeout(() => {
+                    const searchBtn = document.getElementById('searchBtn');
+                    if (searchBtn) searchBtn.click();
+                }, 500);
+            } else {
+                showMessage('❌ Code-barres non détecté. Assurez-vous que le code-barres est bien visible et centré, puis réessayez.', 'warning');
+            }
+        } catch (error) {
+            console.error('Scan error:', error);
+            showMessage('❌ Erreur lors du scan. Veuillez réessayer.', 'error');
+        } finally {
+            // Reset button state
+            scanBtn.innerHTML = originalText;
+            scanBtn.disabled = false;
+            cameraInput.value = ''; // Reset file input
+        }
+    };
+}
+

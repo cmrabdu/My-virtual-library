@@ -143,3 +143,77 @@ async function searchOpenLibrary(isbn) {
         return null;
     }
 }
+
+/**
+ * Scan barcode from image using QuaggaJS (local processing)
+ * @param {File} imageFile - Image file from camera
+ * @returns {Promise<string|null>} - Extracted ISBN or null
+ */
+async function scanBarcodeFromImage(imageFile) {
+    return new Promise((resolve) => {
+        try {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // Create canvas to process image
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // Use QuaggaJS to decode barcode
+                    Quagga.decodeSingle({
+                        src: e.target.result,
+                        numOfWorkers: 0,
+                        inputStream: {
+                            size: 800
+                        },
+                        decoder: {
+                            readers: [
+                                'ean_reader',
+                                'ean_8_reader',
+                                'code_128_reader',
+                                'code_39_reader',
+                                'upc_reader',
+                                'upc_e_reader'
+                            ],
+                            multiple: false
+                        },
+                        locate: true
+                    }, function(result) {
+                        if (result && result.codeResult) {
+                            const code = result.codeResult.code;
+                            console.log('Barcode detected:', code);
+                            
+                            // Validate ISBN format
+                            const cleanCode = code.replace(/[\s-]/g, '');
+                            if (cleanCode.length === 10 || cleanCode.length === 13) {
+                                resolve(cleanCode);
+                            } else {
+                                console.log('Invalid ISBN length:', cleanCode.length);
+                                resolve(null);
+                            }
+                        } else {
+                            console.log('No barcode detected');
+                            resolve(null);
+                        }
+                    });
+                };
+                img.src = e.target.result;
+            };
+            
+            reader.onerror = function() {
+                console.error('File reading error');
+                resolve(null);
+            };
+            
+            reader.readAsDataURL(imageFile);
+        } catch (error) {
+            console.error('Scan error:', error);
+            resolve(null);
+        }
+    });
+}

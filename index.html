@@ -154,10 +154,16 @@
                     <label for="isbn">📖 Recherche rapide par ISBN</label>
                     <div class="isbn-input-group">
                         <input type="text" id="isbn" placeholder="Entrez l'ISBN du livre (ex: 9782072762093)">
-                        <button type="button" id="searchBtn" class="btn btn-secondary">
-                            🔍 Rechercher
-                        </button>
+                        <div class="isbn-buttons-group">
+                            <button type="button" id="scanBtn" class="btn btn-scan">
+                                📷 Scanner
+                            </button>
+                            <button type="button" id="searchBtn" class="btn btn-secondary">
+                                🔍 Rechercher
+                            </button>
+                        </div>
                     </div>
+                    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
                 </div>
 
                 <div class="form-divider">
@@ -471,6 +477,7 @@
     </div>
 
     <!-- Scripts modulaires -->
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.4/dist/quagga.min.js"></script>
     <script src="js/config.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/api.js"></script>
