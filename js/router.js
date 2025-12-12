@@ -31,12 +31,20 @@ function navigateTo(pageName) {
             break;
         case 'library':
             displayBooks();
+            // Initialiser l'onglet actif (Mes Livres par défaut)
+            const firstTab = document.querySelector('.library-tab');
+            if (firstTab && !document.querySelector('.library-tab.active')) {
+                firstTab.click();
+            }
             break;
         case 'search':
             // La page recherche est gérée séparément
             break;
         case 'profile':
-            updateProfilePage();
+            updatePublicProfile();
+            break;
+        case 'settings':
+            updateSettingsPage();
             break;
     }
 
@@ -209,31 +217,129 @@ function addBookFromRecommendation(isbn, title, author, pages, cover) {
     }, 100);
 }
 
-function updateProfilePage() {
-    // Nom utilisateur
+// Nouvelle fonction : Vue Profil Public
+function updatePublicProfile() {
     const userName = localStorage.getItem('userName') || 'Lecteur';
-    const userNameEl = document.getElementById('userName');
-    const userNameInput = document.getElementById('userNameInput');
-    if (userNameEl) userNameEl.textContent = userName;
-    if (userNameInput) userNameInput.value = userName;
-
-    // Objectif annuel
-    const yearlyGoal = parseInt(localStorage.getItem('yearlyGoal') || '24');
-    const yearlyGoalInput = document.getElementById('yearlyGoal');
-    if (yearlyGoalInput) yearlyGoalInput.value = yearlyGoal;
-
-    // Stats profil
+    const userBio = localStorage.getItem('userBio') || '';
+    const userAvatar = localStorage.getItem('userAvatar') || '📚';
+    
+    // Mise à jour des infos utilisateur
+    const userNamePublic = document.getElementById('userNamePublic');
+    const userBioPublic = document.getElementById('userBioPublic');
+    const userAvatarDisplay = document.getElementById('userAvatarDisplay');
+    
+    if (userNamePublic) userNamePublic.textContent = '@' + userName.toLowerCase().replace(/\s+/g, '');
+    if (userBioPublic) userBioPublic.textContent = userBio || '🎓 Amateur de livres';
+    if (userAvatarDisplay) userAvatarDisplay.textContent = userAvatar;
+    
+    // Stats
     const totalBooks = books.length;
     const readBooks = books.filter(b => b.status === 'read').length;
     const totalPages = books.reduce((sum, b) => sum + (parseInt(b.pages) || 0), 0);
+    
+    const publicTotalBooks = document.getElementById('publicTotalBooks');
+    const publicReadBooks = document.getElementById('publicReadBooks');
+    const publicPages = document.getElementById('publicPages');
+    
+    if (publicTotalBooks) publicTotalBooks.textContent = totalBooks;
+    if (publicReadBooks) publicReadBooks.textContent = readBooks;
+    if (publicPages) publicPages.textContent = totalPages.toLocaleString();
+    
+    // Afficher livres favoris (5 étoiles)
+    displayFavoriteBooks();
+    
+    // Afficher livres récents
+    displayRecentBooks();
+}
 
-    const profileTotalBooks = document.getElementById('profileTotalBooks');
-    const profileReadBooks = document.getElementById('profileReadBooks');
-    const profilePages = document.getElementById('profilePages');
+// Afficher les livres 5 étoiles
+function displayFavoriteBooks() {
+    const container = document.getElementById('favoriteBooks');
+    if (!container) return;
+    
+    const favoriteBooks = books.filter(b => b.rating === 5).slice(0, 8);
+    
+    if (favoriteBooks.length === 0) {
+        container.innerHTML = '<div class="empty-state-mini"><p>Aucun livre 5 étoiles pour le moment</p></div>';
+        return;
+    }
+    
+    container.innerHTML = '';
+    favoriteBooks.forEach(book => {
+        const bookCard = document.createElement('div');
+        bookCard.className = 'book-card-mini';
+        bookCard.innerHTML = `
+            <div class="book-cover-mini">
+                ${renderBookCover(book)}
+            </div>
+        `;
+        bookCard.onclick = () => viewBookDetails(book.id);
+        container.appendChild(bookCard);
+    });
+}
 
-    if (profileTotalBooks) profileTotalBooks.textContent = totalBooks;
-    if (profileReadBooks) profileReadBooks.textContent = readBooks;
-    if (profilePages) profilePages.textContent = totalPages;
+// Afficher les livres récents
+function displayRecentBooks() {
+    const container = document.getElementById('recentBooks');
+    if (!container) return;
+    
+    const recentBooks = [...books]
+        .sort((a, b) => new Date(b.addedDate) - new Date(a.addedDate))
+        .slice(0, 6);
+    
+    if (recentBooks.length === 0) {
+        container.innerHTML = '<div class="empty-state-mini"><p>Aucun livre ajouté récemment</p></div>';
+        return;
+    }
+    
+    container.innerHTML = '';
+    recentBooks.forEach(book => {
+        const bookCard = document.createElement('div');
+        bookCard.className = 'book-card-mini';
+        bookCard.innerHTML = `
+            <div class="book-cover-mini">
+                ${renderBookCover(book)}
+            </div>
+        `;
+        bookCard.onclick = () => viewBookDetails(book.id);
+        container.appendChild(bookCard);
+    });
+}
+
+// Nouvelle fonction : Page Paramètres
+function updateSettingsPage() {
+    const userName = localStorage.getItem('userName') || 'Lecteur';
+    const userBio = localStorage.getItem('userBio') || '';
+    const userAvatar = localStorage.getItem('userAvatar') || '📚';
+    const yearlyGoal = parseInt(localStorage.getItem('yearlyGoal') || '24');
+    
+    // Remplir les champs
+    const userNameInput = document.getElementById('userNameInput');
+    const userBioInput = document.getElementById('userBio');
+    const bioCharCount = document.getElementById('bioCharCount');
+    const yearlyGoalInput = document.getElementById('yearlyGoal');
+    const currentEmoji = document.getElementById('currentEmoji');
+    
+    if (userNameInput) userNameInput.value = userName;
+    if (userBioInput) {
+        userBioInput.value = userBio;
+        if (bioCharCount) bioCharCount.textContent = userBio.length;
+    }
+    if (yearlyGoalInput) yearlyGoalInput.value = yearlyGoal;
+    if (currentEmoji) currentEmoji.textContent = userAvatar;
+    
+    // Marquer l'emoji sélectionné
+    document.querySelectorAll('.emoji-option').forEach(option => {
+        option.classList.remove('selected');
+        if (option.dataset.emoji === userAvatar) {
+            option.classList.add('selected');
+        }
+    });
+}
+
+function updateProfilePage() {
+    // Cette fonction est conservée pour compatibilité mais n'est plus utilisée
+    updatePublicProfile();
 }
 
 function createBookCard(book) {
@@ -279,14 +385,16 @@ function initRouter() {
         });
     });
 
-    // Boutons de sauvegarde du profil
+    // Boutons de sauvegarde du profil (anciens - à supprimer plus tard)
     const saveSettings = document.getElementById('saveSettings');
     if (saveSettings) {
         saveSettings.addEventListener('click', () => {
             const userName = document.getElementById('userNameInput').value.trim();
+            const userBio = document.getElementById('userBio').value.trim();
             const yearlyGoal = document.getElementById('yearlyGoal').value;
 
             if (userName) localStorage.setItem('userName', userName);
+            if (userBio) localStorage.setItem('userBio', userBio);
             localStorage.setItem('yearlyGoal', yearlyGoal);
 
             updateProfilePage();
@@ -298,6 +406,106 @@ function initRouter() {
             }
             
             showMessage('✅ Paramètres sauvegardés !', 'success');
+        });
+    }
+
+    // NOUVEAUX EVENT LISTENERS - Page Paramètres
+    
+    // Navigation vers Paramètres
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    if (openSettingsBtn) {
+        openSettingsBtn.addEventListener('click', () => {
+            navigateTo('settings');
+        });
+    }
+    
+    // Retour au Profil
+    const backToProfileBtn = document.getElementById('backToProfileBtn');
+    if (backToProfileBtn) {
+        backToProfileBtn.addEventListener('click', () => {
+            navigateTo('profile');
+        });
+    }
+    
+    // Tabs Paramètres
+    const settingsTabs = document.querySelectorAll('.settings-tab');
+    settingsTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTab = tab.dataset.tab;
+            
+            // Désactiver tous les tabs
+            settingsTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Cacher tous les contenus
+            document.querySelectorAll('.settings-tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Afficher le contenu ciblé
+            const targetContent = document.getElementById(`tab-${targetTab}`);
+            if (targetContent) {
+                targetContent.style.display = 'block';
+            }
+        });
+    });
+    
+    // Emoji Picker
+    const emojiOptions = document.querySelectorAll('.emoji-option');
+    const currentEmoji = document.getElementById('currentEmoji');
+    
+    emojiOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const emoji = option.dataset.emoji;
+            
+            // Mettre à jour l'affichage
+            if (currentEmoji) currentEmoji.textContent = emoji;
+            
+            // Marquer comme sélectionné
+            emojiOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            // Sauvegarder
+            localStorage.setItem('userAvatar', emoji);
+        });
+    });
+    
+    // Sauvegarder Profil
+    const saveProfile = document.getElementById('saveProfile');
+    if (saveProfile) {
+        saveProfile.addEventListener('click', () => {
+            const userName = document.getElementById('userNameInput').value.trim();
+            const userBio = document.getElementById('userBio').value.trim();
+            
+            if (userName) localStorage.setItem('userName', userName);
+            localStorage.setItem('userBio', userBio);
+            
+            // Mettre à jour le nom sur la page d'accueil
+            const homeUserName = document.getElementById('homeUserName');
+            if (homeUserName) {
+                homeUserName.textContent = userName || 'Lecteur';
+            }
+            
+            showMessage('✅ Profil enregistré !', 'success');
+        });
+    }
+    
+    // Sauvegarder Compte
+    const saveAccount = document.getElementById('saveAccount');
+    if (saveAccount) {
+        saveAccount.addEventListener('click', () => {
+            const yearlyGoal = document.getElementById('yearlyGoal').value;
+            localStorage.setItem('yearlyGoal', yearlyGoal);
+            showMessage('✅ Préférences enregistrées !', 'success');
+        });
+    }
+
+    // Compteur de caractères pour la bio
+    const userBio = document.getElementById('userBio');
+    const bioCharCount = document.getElementById('bioCharCount');
+    if (userBio && bioCharCount) {
+        userBio.addEventListener('input', () => {
+            bioCharCount.textContent = userBio.value.length;
         });
     }
 
@@ -550,3 +758,87 @@ function addBookFromSearch(isbn, title, author, pages, cover) {
         showMessage('📝 Formulaire pré-rempli, complétez et ajoutez !', 'info');
     }, 100);
 }
+
+// GESTION DES TABS BIBLIOTHÈQUE
+document.addEventListener('DOMContentLoaded', () => {
+    const libraryTabs = document.querySelectorAll('.library-tab');
+    
+    libraryTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTab = tab.dataset.tab;
+            
+            // Retirer active de tous les tabs
+            libraryTabs.forEach(t => t.classList.remove('active'));
+            
+            // Ajouter active au tab cliqué
+            tab.classList.add('active');
+            
+            // Cacher tous les contenus
+            document.querySelectorAll('.library-tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Afficher le contenu correspondant
+            const targetContent = document.getElementById(`tab-${targetTab}`);
+            if (targetContent) {
+                targetContent.style.display = 'block';
+                
+                // Si c'est l'onglet stats, mettre à jour les statistiques
+                if (targetTab === 'stats') {
+                    updateLibraryStats();
+                }
+            }
+        });
+    });
+});
+
+function updateLibraryStats() {
+    // Mettre à jour les compteurs
+    const totalBooks2 = document.getElementById('totalBooks2');
+    const toReadBooks = document.getElementById('toReadBooks');
+    const averageRating = document.getElementById('averageRating');
+    
+    if (totalBooks2) totalBooks2.textContent = books.length;
+    if (toReadBooks) toReadBooks.textContent = books.filter(b => b.status === 'to-read').length;
+    
+    if (averageRating) {
+        const ratedBooks = books.filter(b => b.rating > 0);
+        if (ratedBooks.length > 0) {
+            const avg = ratedBooks.reduce((sum, b) => sum + b.rating, 0) / ratedBooks.length;
+            averageRating.textContent = avg.toFixed(1);
+        } else {
+            averageRating.textContent = '-';
+        }
+    }
+    
+    // Mettre à jour les graphiques (si Chart.js est chargé)
+    if (typeof updateCharts === 'function') {
+        updateCharts();
+    }
+    
+    // Mettre à jour l'objectif annuel
+    updateYearlyGoal();
+}
+
+function updateYearlyGoal() {
+    const yearlyGoal = parseInt(localStorage.getItem('yearlyGoal')) || 24;
+    const currentYear = new Date().getFullYear();
+    const booksThisYear = books.filter(b => {
+        if (!b.addedDate) return false;
+        const bookYear = new Date(b.addedDate).getFullYear();
+        return bookYear === currentYear;
+    }).length;
+    
+    const progressFill = document.getElementById('yearlyProgress');
+    const progressText = document.getElementById('progressText');
+    
+    if (progressFill) {
+        const percentage = Math.min((booksThisYear / yearlyGoal) * 100, 100);
+        progressFill.style.width = `${percentage}%`;
+    }
+    
+    if (progressText) {
+        progressText.textContent = `${booksThisYear} / ${yearlyGoal} livres`;
+    }
+}
+
