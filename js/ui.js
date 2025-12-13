@@ -552,3 +552,44 @@ async function handleISBNScan() {
     };
 }
 
+// Gérer les boutons de sélection de statut
+document.addEventListener('DOMContentLoaded', () => {
+    const statusOptions = document.querySelectorAll('.status-option');
+    const statusInput = document.getElementById('status');
+    
+    statusOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            // Retirer active de tous les boutons
+            statusOptions.forEach(opt => opt.classList.remove('active'));
+            
+            // Ajouter active au bouton cliqué
+            option.classList.add('active');
+            
+            // Mettre à jour le input hidden
+            const selectedStatus = option.dataset.status;
+            statusInput.value = selectedStatus;
+            
+            // Gérer l'affichage des champs conditionnels
+            toggleReadOnlyFields();
+        });
+    });
+});
+
+// Gérer l'affichage conditionnel des champs selon le statut
+function toggleReadOnlyFields() {
+    const statusInput = document.getElementById('status');
+    const ratingGroup = document.getElementById('ratingGroup');
+    const summaryGroup = document.getElementById('summaryGroup');
+    const learningsGroup = document.getElementById('learningsGroup');
+    
+    if (!statusInput || !summaryGroup || !learningsGroup) return;
+    
+    const isRead = statusInput.value === 'read';
+    
+    // Afficher/masquer les champs selon le statut
+    if (ratingGroup) {
+        ratingGroup.style.display = isRead ? 'block' : 'none';
+    }
+    summaryGroup.style.display = isRead ? 'block' : 'none';
+    learningsGroup.style.display = isRead ? 'block' : 'none';
+}

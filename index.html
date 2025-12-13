@@ -18,10 +18,8 @@
         <!-- PAGE 1: ACCUEIL -->
         <div class="page" id="page-home" style="display: block;">
             <div class="page-header">
-                <div class="welcome-message">
-                    <h1>👋 Bonjour <span id="homeUserName">Lecteur</span> !</h1>
-                    <p class="welcome-subtitle">Bienvenue dans votre bibliothèque personnelle</p>
-                </div>
+                <h1>👋 Bonjour <span id="homeUserName">Lecteur</span> !</h1>
+                <p class="welcome-subtitle">Bienvenue dans votre bibliothèque personnelle</p>
             </div>
 
             <!-- Statistiques rapides -->
@@ -298,18 +296,28 @@
                         <label for="pages">Nombre de pages</label>
                         <input type="number" id="pages" placeholder="300">
                     </div>
-
-                    <div class="form-group">
-                        <label for="status">Statut</label>
-                        <select id="status" required>
-                            <option value="to-read">📚 À lire</option>
-                            <option value="reading">📖 En cours</option>
-                            <option value="read">✅ Lu</option>
-                        </select>
-                    </div>
                 </div>
 
                 <div class="form-group">
+                    <label>Statut</label>
+                    <div class="status-selector">
+                        <button type="button" class="status-option" data-status="to-read">
+                            <span class="status-icon">📚</span>
+                            <span class="status-label">À lire</span>
+                        </button>
+                        <button type="button" class="status-option active" data-status="reading">
+                            <span class="status-icon">📖</span>
+                            <span class="status-label">En cours</span>
+                        </button>
+                        <button type="button" class="status-option" data-status="read">
+                            <span class="status-icon">✅</span>
+                            <span class="status-label">Lu</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="status" value="reading" required>
+                </div>
+
+                <div class="form-group" id="ratingGroup" style="display: none;">
                     <label for="rating">Note</label>
                     <div class="star-rating" id="starRating">
                         <span class="star" data-rating="1">☆</span>
@@ -321,13 +329,13 @@
                     <input type="hidden" id="rating" value="0">
                 </div>
 
-                <!-- Détails optionnels -->
-                <div class="form-group">
+                <!-- Détails optionnels (visible uniquement si statut = "lu") -->
+                <div class="form-group" id="summaryGroup" style="display: none;">
                     <label for="summary">Résumé (optionnel)</label>
                     <textarea id="summary" rows="3" placeholder="Un bref résumé du livre..."></textarea>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="learningsGroup" style="display: none;">
                     <label for="learnings">Apprentissages (optionnel)</label>
                     <textarea id="learnings" rows="3" placeholder="Ce que vous avez appris de ce livre..."></textarea>
                 </div>
@@ -533,8 +541,8 @@
                     </button>
 
                     <div class="about-section">
-                        <p class="version-info">📚 Ma Bibliothèque v0.6.0.0</p>
-                        <p class="version-date">Décembre 2025 • Library tabs & mobile fixes</p>
+                        <p class="version-info">📚 Ma Bibliothèque v0.6.1.0</p>
+                        <p class="version-date">Décembre 2025 • Status selector & UX improvements</p>
                     </div>
                 </div>
             </div>
