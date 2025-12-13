@@ -162,58 +162,184 @@
 
             <!-- TAB: STATISTIQUES -->
             <div class="library-tab-content" id="tab-stats" style="display: none;">
-                <div class="stats-overview">
-                    <div class="stat-card stat-card-outline">
-                        <div class="stat-icon-large">📚</div>
-                        <div class="stat-number" id="totalBooks2">0</div>
-                        <div class="stat-label">Total</div>
+                
+                <!-- Hero Stats -->
+                <div class="stats-hero">
+                    <div class="hero-stat">
+                        <div class="hero-stat-value" id="statTotalBooks">0</div>
+                        <div class="hero-stat-label">livres</div>
                     </div>
-                    <div class="stat-card stat-card-outline">
-                        <div class="stat-icon-large">📖</div>
-                        <div class="stat-number" id="toReadBooks">0</div>
-                        <div class="stat-label">À lire</div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value" id="statTotalPages">0</div>
+                        <div class="hero-stat-label">pages lues</div>
                     </div>
-                    <div class="stat-card stat-card-outline">
-                        <div class="stat-icon-large">⭐</div>
-                        <div class="stat-number" id="averageRating">-</div>
-                        <div class="stat-label">Note moyenne</div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value" id="statAvgRating">-</div>
+                        <div class="hero-stat-label">note moyenne</div>
                     </div>
                 </div>
 
-                <div class="charts-container">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3>📚 Répartition des livres</h3>
-                        </div>
-                        <canvas id="statusChart" width="300" height="300"></canvas>
+                <!-- Objectif annuel -->
+                <div class="stats-card stats-goal-card">
+                    <div class="stats-card-header">
+                        <span class="stats-card-icon">🎯</span>
+                        <h3>Objectif <span id="currentYear">2025</span></h3>
                     </div>
-                    
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3>⭐ Distribution des notes</h3>
+                    <div class="goal-progress-container">
+                        <div class="goal-progress-bar">
+                            <div class="goal-progress-fill" id="goalProgressFill"></div>
+                            <div class="goal-progress-marker" id="goalMarker"></div>
                         </div>
-                        <canvas id="ratingChart" width="300" height="200"></canvas>
+                        <div class="goal-progress-labels">
+                            <span class="goal-current" id="goalCurrent">0</span>
+                            <span class="goal-target" id="goalTarget">/ 24 livres</span>
+                        </div>
                     </div>
-                    
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3>📈 Évolution mensuelle</h3>
-                        </div>
-                        <canvas id="evolutionChart" width="300" height="200"></canvas>
+                    <div class="goal-motivation" id="goalMotivation">
+                        <span class="motivation-emoji">🚀</span>
+                        <span class="motivation-text">Commencez votre aventure littéraire !</span>
                     </div>
-                    
-                    <div class="chart-card chart-card-goal">
-                        <div class="chart-header">
-                            <h3>🎯 Objectif annuel</h3>
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="yearlyProgress"></div>
+                </div>
+
+                <!-- Répartition par statut -->
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <span class="stats-card-icon">📊</span>
+                        <h3>Répartition</h3>
+                    </div>
+                    <div class="status-bars">
+                        <div class="status-bar-item">
+                            <div class="status-bar-header">
+                                <span class="status-bar-label">✅ Lus</span>
+                                <span class="status-bar-count" id="barReadCount">0</span>
                             </div>
-                            <div class="progress-text" id="progressText">0 / 24 livres</div>
+                            <div class="status-bar-track">
+                                <div class="status-bar-fill status-bar-read" id="barReadFill"></div>
+                            </div>
+                        </div>
+                        <div class="status-bar-item">
+                            <div class="status-bar-header">
+                                <span class="status-bar-label">📖 En cours</span>
+                                <span class="status-bar-count" id="barReadingCount">0</span>
+                            </div>
+                            <div class="status-bar-track">
+                                <div class="status-bar-fill status-bar-reading" id="barReadingFill"></div>
+                            </div>
+                        </div>
+                        <div class="status-bar-item">
+                            <div class="status-bar-header">
+                                <span class="status-bar-label">📚 À lire</span>
+                                <span class="status-bar-count" id="barToReadCount">0</span>
+                            </div>
+                            <div class="status-bar-track">
+                                <div class="status-bar-fill status-bar-toread" id="barToReadFill"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Records personnels -->
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <span class="stats-card-icon">🏆</span>
+                        <h3>Records personnels</h3>
+                    </div>
+                    <div class="records-grid">
+                        <div class="record-item">
+                            <div class="record-icon">📖</div>
+                            <div class="record-info">
+                                <div class="record-value" id="recordLongestBook">-</div>
+                                <div class="record-label">Livre le plus long</div>
+                            </div>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-icon">📅</div>
+                            <div class="record-info">
+                                <div class="record-value" id="recordBestMonth">-</div>
+                                <div class="record-label">Meilleur mois</div>
+                            </div>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-icon">⭐</div>
+                            <div class="record-info">
+                                <div class="record-value" id="recordTopRated">-</div>
+                                <div class="record-label">Livres 5 étoiles</div>
+                            </div>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-icon">✍️</div>
+                            <div class="record-info">
+                                <div class="record-value" id="recordFavAuthor">-</div>
+                                <div class="record-label">Auteur favori</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Distribution des notes -->
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <span class="stats-card-icon">⭐</span>
+                        <h3>Vos notes</h3>
+                    </div>
+                    <div class="rating-distribution">
+                        <div class="rating-bar-item">
+                            <span class="rating-label">5★</span>
+                            <div class="rating-bar-track">
+                                <div class="rating-bar-fill" id="rating5Fill"></div>
+                            </div>
+                            <span class="rating-count" id="rating5Count">0</span>
+                        </div>
+                        <div class="rating-bar-item">
+                            <span class="rating-label">4★</span>
+                            <div class="rating-bar-track">
+                                <div class="rating-bar-fill" id="rating4Fill"></div>
+                            </div>
+                            <span class="rating-count" id="rating4Count">0</span>
+                        </div>
+                        <div class="rating-bar-item">
+                            <span class="rating-label">3★</span>
+                            <div class="rating-bar-track">
+                                <div class="rating-bar-fill" id="rating3Fill"></div>
+                            </div>
+                            <span class="rating-count" id="rating3Count">0</span>
+                        </div>
+                        <div class="rating-bar-item">
+                            <span class="rating-label">2★</span>
+                            <div class="rating-bar-track">
+                                <div class="rating-bar-fill" id="rating2Fill"></div>
+                            </div>
+                            <span class="rating-count" id="rating2Count">0</span>
+                        </div>
+                        <div class="rating-bar-item">
+                            <span class="rating-label">1★</span>
+                            <div class="rating-bar-track">
+                                <div class="rating-bar-fill" id="rating1Fill"></div>
+                            </div>
+                            <span class="rating-count" id="rating1Count">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activité mensuelle -->
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <span class="stats-card-icon">📈</span>
+                        <h3>Activité récente</h3>
+                    </div>
+                    <div class="activity-chart" id="activityChart">
+                        <!-- Généré par JS -->
+                    </div>
+                    <div class="activity-legend">
+                        <span class="activity-legend-item">
+                            <span class="legend-dot"></span>
+                            Livres ajoutés par mois
+                        </span>
+                    </div>
+                </div>
+
             </div>
 
             <!-- TAB: CONNAISSANCES (IA) -->
@@ -247,12 +373,7 @@
             </div>
         </div>
 
-        <!-- PAGE 3: RECHERCHER -->
-                </div>
-            </div>
-        </div>
-
-        <!-- PAGE 3: AJOUTER -->
+        <!-- PAGE 3: AJOUTER UN LIVRE -->
         <div class="page" id="page-add" style="display: none;">
             <div class="page-header">
                 <h1>➕ Ajouter un livre</h1>
@@ -346,7 +467,7 @@
             </form>
         </div>
 
-        <!-- PAGE 4: RECHERCHER -->
+        <!-- PAGE 4: RECHERCHE -->
         <div class="page" id="page-search" style="display: none;">
             <div class="page-header">
                 <h1>🔍 Rechercher</h1>
@@ -541,8 +662,8 @@
                     </button>
 
                     <div class="about-section">
-                        <p class="version-info">📚 Ma Bibliothèque v0.6.1.1</p>
-                        <p class="version-date">Décembre 2025 • Status selector & UX improvements</p>
+                        <p class="version-info">📚 Ma Bibliothèque v0.6.2.0</p>
+                        <p class="version-date">Décembre 2025 • Nouvelle page Statistiques</p>
                     </div>
                 </div>
             </div>

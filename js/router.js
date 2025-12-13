@@ -234,16 +234,19 @@ function updatePublicProfile() {
     
     // Stats
     const totalBooks = books.length;
-    const readBooks = books.filter(b => b.status === 'read').length;
-    const totalPages = books.reduce((sum, b) => sum + (parseInt(b.pages) || 0), 0);
+    const readBooksCount = books.filter(b => b.status === 'read').length;
+    // Compter uniquement les pages des livres LUS
+    const readBooksPages = books
+        .filter(b => b.status === 'read')
+        .reduce((sum, b) => sum + (parseInt(b.pages) || 0), 0);
     
     const publicTotalBooks = document.getElementById('publicTotalBooks');
     const publicReadBooks = document.getElementById('publicReadBooks');
     const publicPages = document.getElementById('publicPages');
     
     if (publicTotalBooks) publicTotalBooks.textContent = totalBooks;
-    if (publicReadBooks) publicReadBooks.textContent = readBooks;
-    if (publicPages) publicPages.textContent = totalPages.toLocaleString();
+    if (publicReadBooks) publicReadBooks.textContent = readBooksCount;
+    if (publicPages) publicPages.textContent = readBooksPages.toLocaleString();
     
     // Afficher livres favoris (5 étoiles)
     displayFavoriteBooks();
