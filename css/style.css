@@ -2374,6 +2374,8 @@ body {
 
 .settings-tab-content {
     display: none;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .settings-tab-content[style*="display: block"] {
