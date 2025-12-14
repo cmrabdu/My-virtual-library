@@ -409,6 +409,12 @@ function initRouter() {
 
             updateProfilePage();
             
+            // Mettre à jour les statistiques
+            updateYearlyGoal();
+            if (typeof updateCharts === 'function') {
+                updateCharts();
+            }
+            
             // Mettre à jour le nom sur la page d'accueil
             const homeUserName = document.getElementById('homeUserName');
             if (homeUserName) {
@@ -506,6 +512,13 @@ function initRouter() {
         saveAccount.addEventListener('click', () => {
             const yearlyGoal = document.getElementById('yearlyGoal').value;
             localStorage.setItem('yearlyGoal', yearlyGoal);
+            
+            // Mettre à jour les statistiques
+            updateYearlyGoal();
+            if (typeof updateCharts === 'function') {
+                updateCharts();
+            }
+            
             showMessage('✅ Préférences enregistrées !', 'success');
         });
     }
