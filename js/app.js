@@ -5,4 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     bindEvents();
     initRouter();
     updateStats();
+    
+    // Rendre les collections après le chargement des données
+    setTimeout(() => {
+        if (typeof renderCollectionsGrid === 'function') {
+            renderCollectionsGrid();
+        }
+    }, 100);
 });

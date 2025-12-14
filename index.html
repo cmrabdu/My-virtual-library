@@ -131,17 +131,84 @@
                     </div>
                 </div>
 
-                <!-- Filtres -->
-                <div class="library-filters">
-                    <div class="search-input-wrapper">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" id="searchBooks" placeholder="Rechercher par titre ou auteur...">
+                <!-- Indicateur de filtre actif (collection, genre, etc.) -->
+                <div class="active-filter-banner" id="activeFilterBanner" style="display: none;">
+                    <div class="filter-info">
+                        <span class="filter-icon" id="activeFilterIcon">📚</span>
+                        <span class="filter-name" id="activeFilterName">Collection</span>
+                        <span class="filter-count" id="activeFilterCount">0 livres</span>
                     </div>
-                    <div class="status-filter-chips">
-                        <button class="status-chip active" data-status="">📚 Tous</button>
-                        <button class="status-chip" data-status="to-read">📖 À lire</button>
-                        <button class="status-chip" data-status="reading">📕 En cours</button>
-                        <button class="status-chip" data-status="read">✅ Lus</button>
+                    <button class="btn-clear-filter-large" onclick="clearAllFilters()">
+                        <span>✕</span> Effacer le filtre
+                    </button>
+                </div>
+
+                <!-- Filtres avancés -->
+                <div class="library-filters-advanced">
+                    <!-- Recherche -->
+                    <div class="filter-row">
+                        <div class="search-input-wrapper">
+                            <svg class="search-icon-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                            </svg>
+                            <input type="text" id="searchBooks" placeholder="Rechercher par titre ou auteur...">
+                        </div>
+                    </div>
+
+                    <!-- Filtres par statut -->
+                    <div class="filter-row">
+                        <div class="status-filter-chips">
+                            <button class="status-chip active" data-status="">📚 Tous</button>
+                            <button class="status-chip" data-status="to-read">📖 À lire</button>
+                            <button class="status-chip" data-status="reading">📕 En cours</button>
+                            <button class="status-chip" data-status="read">✅ Lus</button>
+                        </div>
+                    </div>
+
+                    <!-- Filtres dropdown -->
+                    <div class="filter-row filter-dropdowns">
+                        <!-- Collections -->
+                        <div class="filter-dropdown">
+                            <button class="filter-dropdown-btn" id="collectionsFilterBtn">
+                                <span class="dropdown-icon">📚</span>
+                                <span class="dropdown-label">Collections</span>
+                                <span class="dropdown-arrow">▼</span>
+                            </button>
+                            <div class="filter-dropdown-menu" id="collectionsFilterMenu">
+                                <div class="dropdown-menu-content" id="collectionsFilterList">
+                                    <!-- Collections will be rendered here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Genres -->
+                        <div class="filter-dropdown">
+                            <button class="filter-dropdown-btn" id="genresFilterBtn">
+                                <span class="dropdown-icon">📖</span>
+                                <span class="dropdown-label">Genres</span>
+                                <span class="dropdown-arrow">▼</span>
+                            </button>
+                            <div class="filter-dropdown-menu" id="genresFilterMenu">
+                                <div class="dropdown-menu-content" id="genresFilterList">
+                                    <!-- Genres will be rendered here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="filter-dropdown">
+                            <button class="filter-dropdown-btn" id="tagsFilterBtn">
+                                <span class="dropdown-icon">🏷️</span>
+                                <span class="dropdown-label">Tags</span>
+                                <span class="dropdown-arrow">▼</span>
+                            </button>
+                            <div class="filter-dropdown-menu" id="tagsFilterMenu">
+                                <div class="dropdown-menu-content" id="tagsFilterList">
+                                    <!-- Tags will be rendered here -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -450,6 +517,22 @@
                     <input type="hidden" id="rating" value="0">
                 </div>
 
+                <!-- Genres -->
+                <div class="form-group">
+                    <label>📖 Genres</label>
+                    <div class="add-genres-container">
+                        <div class="modal-chips" id="addGenresChips"></div>
+                        <div class="modal-chip-input-wrapper">
+                            <input type="text" 
+                                   class="modal-chip-input" 
+                                   id="addGenreInput" 
+                                   placeholder="Ajouter un genre..."
+                                   autocomplete="off">
+                            <div class="chip-suggestions" id="addGenreSuggestions"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Détails optionnels (visible uniquement si statut = "lu") -->
                 <div class="form-group" id="summaryGroup" style="display: none;">
                     <label for="summary">Résumé (optionnel)</label>
@@ -475,8 +558,14 @@
 
             <div class="search-section">
                 <div class="search-bar-container">
-                    <input type="text" id="globalSearchInput" placeholder="🔍 Rechercher un livre, un auteur..." class="search-input-large">
-                    <button id="globalSearchBtn" class="btn btn-primary">🔍 Rechercher</button>
+                    <div class="search-input-wrapper search-input-large-wrapper">
+                        <svg class="search-icon-svg" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.3-4.3"></path>
+                        </svg>
+                        <input type="text" id="globalSearchInput" placeholder="Rechercher un livre, un auteur...">
+                    </div>
+                    <button id="globalSearchBtn" class="btn btn-primary">Rechercher</button>
                 </div>
 
                 <div class="search-filters">
@@ -559,6 +648,51 @@
                             <p>Aucun livre ajouté récemment</p>
                         </div>
                     </div>
+                </div>
+
+                <!-- Mes Collections -->
+                <div class="profile-section-public">
+                    <div class="section-header-with-action">
+                        <h3 class="section-title-public">📚 Mes Collections</h3>
+                        <button class="btn-add-small" id="addCollectionBtn" title="Créer une collection">
+                            <span>+</span>
+                        </button>
+                    </div>
+                    <div class="collections-grid" id="collectionsGrid">
+                        <!-- Collections will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Créer une Collection -->
+        <div class="create-collection-modal" id="createCollectionModal" style="display: none;">
+            <div class="create-collection-content">
+                <h3>📚 Nouvelle Collection</h3>
+                <div class="form-group">
+                    <label>Nom de la collection</label>
+                    <input type="text" id="newCollectionName" placeholder="Ex: Mes favoris, À relire..." maxlength="30">
+                </div>
+                <div class="form-group">
+                    <label>Icône</label>
+                    <div class="collection-icons-grid">
+                        <button type="button" class="collection-icon-btn active" data-icon="📚">📚</button>
+                        <button type="button" class="collection-icon-btn" data-icon="⭐">⭐</button>
+                        <button type="button" class="collection-icon-btn" data-icon="❤️">❤️</button>
+                        <button type="button" class="collection-icon-btn" data-icon="🎯">🎯</button>
+                        <button type="button" class="collection-icon-btn" data-icon="🔥">🔥</button>
+                        <button type="button" class="collection-icon-btn" data-icon="💡">💡</button>
+                        <button type="button" class="collection-icon-btn" data-icon="🏆">🏆</button>
+                        <button type="button" class="collection-icon-btn" data-icon="📖">📖</button>
+                        <button type="button" class="collection-icon-btn" data-icon="🎓">🎓</button>
+                        <button type="button" class="collection-icon-btn" data-icon="💼">💼</button>
+                        <button type="button" class="collection-icon-btn" data-icon="🌟">🌟</button>
+                        <button type="button" class="collection-icon-btn" data-icon="🎁">🎁</button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelCollectionBtn">Annuler</button>
+                    <button class="btn btn-primary" id="confirmCollectionBtn">Créer</button>
                 </div>
             </div>
         </div>
@@ -662,8 +796,8 @@
                     </button>
 
                     <div class="about-section">
-                        <p class="version-info">📚 Ma Bibliothèque v0.6.4.0</p>
-                        <p class="version-date">Décembre 2025 • Book details modal</p>
+                        <p class="version-info">📚 Ma Bibliothèque v0.6.6.0</p>
+                        <p class="version-date">Décembre 2025 • advanced library filters</p>
                     </div>
                 </div>
             </div>
@@ -791,6 +925,46 @@
                         <button class="modal-status-option" data-status="read">
                             <span>✅</span> Lu
                         </button>
+                    </div>
+                </div>
+
+                <!-- Genres -->
+                <div class="modal-section">
+                    <h3>📖 Genres</h3>
+                    <div class="modal-genres-container">
+                        <div class="modal-chips" id="modalGenresChips"></div>
+                        <div class="modal-chip-input-wrapper">
+                            <input type="text" 
+                                   class="modal-chip-input" 
+                                   id="modalGenreInput" 
+                                   placeholder="Ajouter un genre..."
+                                   autocomplete="off">
+                            <div class="chip-suggestions" id="genreSuggestions"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="modal-section">
+                    <h3>🏷️ Tags</h3>
+                    <div class="modal-tags-container">
+                        <div class="modal-chips" id="modalTagsChips"></div>
+                        <div class="modal-chip-input-wrapper">
+                            <input type="text" 
+                                   class="modal-chip-input" 
+                                   id="modalTagInput" 
+                                   placeholder="Ajouter un tag..."
+                                   autocomplete="off">
+                            <div class="chip-suggestions" id="tagSuggestions"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collections -->
+                <div class="modal-section">
+                    <h3>📚 Collections</h3>
+                    <div class="modal-collections-container" id="modalCollections">
+                        <!-- Collections checkboxes will be rendered here -->
                     </div>
                 </div>
 

@@ -1,5 +1,17 @@
 // Gestion de l'interface utilisateur et des interactions
 
+// Genres for add book form
+let addBookGenres = [];
+
+// État des filtres avancés
+let activeFilters = {
+    status: '',
+    genre: '',
+    collection: '',
+    tag: '',
+    search: ''
+};
+
 function handleAddBook(event) {
     event.preventDefault();
     const isbn = document.getElementById('isbn').value.trim();
@@ -34,6 +46,9 @@ function handleAddBook(event) {
         rating,
         summary,
         learnings,
+        genres: [...addBookGenres],
+        tags: [],
+        collections: [],
         currentPage: 0,
         addedDate: new Date().toLocaleDateString('fr-FR')
     };
@@ -45,7 +60,9 @@ function handleAddBook(event) {
     // Reset complet
     event.target.reset();
     resetRating();
+    resetAddBookGenres();
     CONFIG.tempCoverUrl = null;
+    CONFIG.tempGenres = [];
     
     // Mettre à jour toutes les vues
     updateStats();
@@ -56,6 +73,112 @@ function handleAddBook(event) {
     
     // Navigation douce vers l'accueil
     setTimeout(() => navigateTo('home'), 800);
+}
+
+// ========================================
+// ADD BOOK GENRES MANAGEMENT
+// ========================================
+
+function renderAddBookGenres() {
+    const container = document.getElementById('addGenresChips');
+    if (!container) return;
+    
+    if (addBookGenres.length === 0) {
+        container.innerHTML = '<span class="chips-empty">Aucun genre sélectionné</span>';
+        return;
+    }
+    
+    container.innerHTML = addBookGenres.map(genre => `
+        <span class="chip chip-genre">
+            ${genre}
+            <button type="button" class="chip-remove" onclick="removeAddBookGenre('${genre}')" title="Supprimer">×</button>
+        </span>
+    `).join('');
+}
+
+function removeAddBookGenre(genre) {
+    addBookGenres = addBookGenres.filter(g => g !== genre);
+    renderAddBookGenres();
+}
+
+function addAddBookGenre(genre) {
+    const trimmed = genre.trim();
+    if (trimmed && !addBookGenres.includes(trimmed)) {
+        addBookGenres.push(trimmed);
+        addGenre(trimmed); // Add to library genres
+        renderAddBookGenres();
+    }
+    const input = document.getElementById('addGenreInput');
+    if (input) input.value = '';
+    hideSuggestions('addGenreSuggestions');
+}
+
+function showAddGenreSuggestions(query) {
+    const suggestionsEl = document.getElementById('addGenreSuggestions');
+    if (!suggestionsEl) return;
+    
+    const trimmedQuery = query.trim().toLowerCase();
+    
+    // Filter genres (show all if empty, filter if typing)
+    let filtered;
+    if (!trimmedQuery) {
+        filtered = libraryGenres.filter(genre => 
+            !addBookGenres.includes(genre)
+        ).slice(0, 10);
+    } else {
+        filtered = libraryGenres.filter(genre => 
+            genre.toLowerCase().includes(trimmedQuery) && 
+            !addBookGenres.includes(genre)
+        ).slice(0, 8);
+    }
+    
+    const exactMatch = libraryGenres.some(g => g.toLowerCase() === trimmedQuery);
+    
+    let html = filtered.map(genre => `
+        <div class="chip-suggestion" onclick="addAddBookGenre('${genre}')">${genre}</div>
+    `).join('');
+    
+    if (!exactMatch && trimmedQuery.length >= 2) {
+        const capitalizedQuery = query.trim().charAt(0).toUpperCase() + query.trim().slice(1);
+        html += `<div class="chip-suggestion chip-suggestion-new" onclick="addAddBookGenre('${capitalizedQuery}')">Créer "${capitalizedQuery}"</div>`;
+    }
+    
+    if (html) {
+        suggestionsEl.innerHTML = html;
+        suggestionsEl.classList.add('active');
+    } else {
+        hideSuggestions('addGenreSuggestions');
+    }
+}
+
+function resetAddBookGenres() {
+    addBookGenres = [];
+    renderAddBookGenres();
+}
+
+function initAddBookGenres() {
+    const input = document.getElementById('addGenreInput');
+    if (input) {
+        input.addEventListener('focus', () => {
+            showAddGenreSuggestions(input.value);
+        });
+        input.addEventListener('input', (e) => {
+            showAddGenreSuggestions(e.target.value);
+        });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const value = e.target.value.trim();
+                if (value) {
+                    addAddBookGenre(value.charAt(0).toUpperCase() + value.slice(1));
+                }
+            }
+        });
+        input.addEventListener('blur', () => {
+            setTimeout(() => hideSuggestions('addGenreSuggestions'), 200);
+        });
+    }
+    renderAddBookGenres();
 }
 
 function displayBooks() {
@@ -110,6 +233,11 @@ function displayBooks() {
                 <div class="book-status" style="cursor: pointer;" onclick="event.stopPropagation(); editBookStatus(${book.id})" title="Cliquer pour changer le statut">
                     <span class="status-badge status-${book.status}">${getStatusLabel(book.status)}</span>
                 </div>
+                ${book.genres && book.genres.length > 0 ? `
+                <div class="book-genres-mini" onclick="event.stopPropagation();">
+                    ${book.genres.slice(0, 2).map(g => `<span class="genre-chip-mini">${g}</span>`).join('')}
+                    ${book.genres.length > 2 ? `<span class="genre-chip-mini more">+${book.genres.length - 2}</span>` : ''}
+                </div>` : ''}
                 <div class="book-rating" style="margin: 8px 0;" onclick="event.stopPropagation();">
                     <div class="stars interactive-stars" data-book-id="${book.id}">
                         ${renderInteractiveStars(book.rating, book.id)}
@@ -228,31 +356,21 @@ function bindEvents() {
             chip.classList.add('active');
             
             const status = chip.dataset.status;
-            filteredBooks = status ? books.filter(b => b.status === status) : [...books];
-            displayBooks();
+            activeFilters.status = status;
+            applyFilters();
         });
     });
 
     const searchBooks = document.getElementById('searchBooks');
     if (searchBooks) {
         searchBooks.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            
-            // Récupérer le filtre actif
-            const activeChip = document.querySelector('.status-chip.active');
-            const activeStatus = activeChip ? activeChip.dataset.status : '';
-            
-            // Filtrer d'abord par statut si nécessaire
-            let baseBooks = activeStatus ? books.filter(b => b.status === activeStatus) : [...books];
-            
-            // Puis filtrer par recherche
-            filteredBooks = baseBooks.filter(b => 
-                b.title.toLowerCase().includes(query) || 
-                b.author.toLowerCase().includes(query)
-            );
-            displayBooks();
+            activeFilters.search = e.target.value.trim();
+            applyFilters();
         });
     }
+    
+    // Initialiser les filtres avancés
+    initAdvancedFilters();
 
     const exportBtn = document.getElementById('exportBtn');
     if (exportBtn) {
@@ -479,12 +597,18 @@ function viewBookDetails(bookId) {
 // ========================================
 
 let currentModalBookId = null;
+let currentModalGenres = [];
+let currentModalTags = [];
 
 function openBookModal(bookId) {
     const book = books.find(b => b.id === bookId);
     if (!book) return;
     
     currentModalBookId = bookId;
+    currentModalGenres = book.genres ? [...book.genres] : [];
+    currentModalTags = book.tags ? [...book.tags] : [];
+    currentModalCollections = book.collections ? [...book.collections] : [];
+    
     const modal = document.getElementById('bookModalOverlay');
     if (!modal) return;
     
@@ -534,6 +658,11 @@ function openBookModal(bookId) {
     // Set rating
     setModalRating(book.rating || 0);
     
+    // Set genres and tags
+    renderModalGenres();
+    renderModalTags();
+    renderModalCollections();
+    
     // Set progress section (only for books with pages)
     if (progressSection) {
         if (book.pages && book.status === 'reading') {
@@ -560,6 +689,165 @@ function openBookModal(bookId) {
     document.body.style.overflow = 'hidden';
 }
 
+// ========================================
+// GENRES & TAGS CHIPS MANAGEMENT
+// ========================================
+
+function renderModalGenres() {
+    const container = document.getElementById('modalGenresChips');
+    if (!container) return;
+    
+    if (currentModalGenres.length === 0) {
+        container.innerHTML = '<span class="chips-empty">Aucun genre</span>';
+        return;
+    }
+    
+    container.innerHTML = currentModalGenres.map(genre => `
+        <span class="chip chip-genre">
+            ${genre}
+            <button class="chip-remove" onclick="removeModalGenre('${genre}')" title="Supprimer">×</button>
+        </span>
+    `).join('');
+}
+
+function renderModalTags() {
+    const container = document.getElementById('modalTagsChips');
+    if (!container) return;
+    
+    if (currentModalTags.length === 0) {
+        container.innerHTML = '<span class="chips-empty">Aucun tag</span>';
+        return;
+    }
+    
+    container.innerHTML = currentModalTags.map(tag => `
+        <span class="chip chip-tag">
+            ${tag}
+            <button class="chip-remove" onclick="removeModalTag('${tag}')" title="Supprimer">×</button>
+        </span>
+    `).join('');
+}
+
+function removeModalGenre(genre) {
+    currentModalGenres = currentModalGenres.filter(g => g !== genre);
+    renderModalGenres();
+}
+
+function removeModalTag(tag) {
+    currentModalTags = currentModalTags.filter(t => t !== tag);
+    renderModalTags();
+}
+
+function addModalGenre(genre) {
+    const trimmed = genre.trim();
+    if (trimmed && !currentModalGenres.includes(trimmed)) {
+        currentModalGenres.push(trimmed);
+        // Also add to library genres if new
+        addGenre(trimmed);
+        renderModalGenres();
+    }
+    // Clear input
+    const input = document.getElementById('modalGenreInput');
+    if (input) input.value = '';
+    hideSuggestions('genreSuggestions');
+}
+
+function addModalTag(tag) {
+    const trimmed = tag.trim().toLowerCase();
+    if (trimmed && !currentModalTags.includes(trimmed)) {
+        currentModalTags.push(trimmed);
+        // Also add to library tags if new
+        addTag(trimmed);
+        renderModalTags();
+    }
+    // Clear input
+    const input = document.getElementById('modalTagInput');
+    if (input) input.value = '';
+    hideSuggestions('tagSuggestions');
+}
+
+function showGenreSuggestions(query) {
+    const suggestionsEl = document.getElementById('genreSuggestions');
+    if (!suggestionsEl) return;
+    
+    const trimmedQuery = query.trim().toLowerCase();
+    
+    // Filter genres that match query (or all if empty) and aren't already selected
+    let filtered;
+    if (!trimmedQuery) {
+        // Show all available genres when empty
+        filtered = libraryGenres.filter(genre => 
+            !currentModalGenres.includes(genre)
+        ).slice(0, 10);
+    } else {
+        filtered = libraryGenres.filter(genre => 
+            genre.toLowerCase().includes(trimmedQuery) && 
+            !currentModalGenres.includes(genre)
+        ).slice(0, 8);
+    }
+    
+    // Check if exact match exists
+    const exactMatch = libraryGenres.some(g => g.toLowerCase() === trimmedQuery);
+    
+    let html = filtered.map(genre => `
+        <div class="chip-suggestion" onclick="addModalGenre('${genre}')">${genre}</div>
+    `).join('');
+    
+    // Add "create new" option if no exact match
+    if (!exactMatch && trimmedQuery.length >= 2) {
+        const capitalizedQuery = query.trim().charAt(0).toUpperCase() + query.trim().slice(1);
+        html += `<div class="chip-suggestion chip-suggestion-new" onclick="addModalGenre('${capitalizedQuery}')">Créer "${capitalizedQuery}"</div>`;
+    }
+    
+    if (html) {
+        suggestionsEl.innerHTML = html;
+        suggestionsEl.classList.add('active');
+    } else {
+        hideSuggestions('genreSuggestions');
+    }
+}
+
+function showTagSuggestions(query) {
+    const suggestionsEl = document.getElementById('tagSuggestions');
+    if (!suggestionsEl) return;
+    
+    const trimmedQuery = query.trim().toLowerCase();
+    
+    if (!trimmedQuery) {
+        hideSuggestions('tagSuggestions');
+        return;
+    }
+    
+    // Filter tags that match query and aren't already selected
+    const filtered = libraryTags.filter(tag => 
+        tag.toLowerCase().includes(trimmedQuery) && 
+        !currentModalTags.includes(tag)
+    ).slice(0, 6);
+    
+    // Check if exact match exists
+    const exactMatch = libraryTags.some(t => t.toLowerCase() === trimmedQuery);
+    
+    let html = filtered.map(tag => `
+        <div class="chip-suggestion" onclick="addModalTag('${tag}')">${tag}</div>
+    `).join('');
+    
+    // Add "create new" option if no exact match
+    if (!exactMatch && trimmedQuery.length >= 2) {
+        html += `<div class="chip-suggestion chip-suggestion-new" onclick="addModalTag('${trimmedQuery}')">Créer "${trimmedQuery}"</div>`;
+    }
+    
+    if (html) {
+        suggestionsEl.innerHTML = html;
+        suggestionsEl.classList.add('active');
+    } else {
+        hideSuggestions('tagSuggestions');
+    }
+}
+
+function hideSuggestions(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+}
+
 function closeBookModal() {
     const modal = document.getElementById('bookModalOverlay');
     if (modal) {
@@ -568,6 +856,9 @@ function closeBookModal() {
             modal.style.display = 'none';
         }, 300);
         document.body.style.overflow = '';
+        currentModalGenres = [];
+        currentModalTags = [];
+        currentModalCollections = [];
         currentModalBookId = null;
     }
 }
@@ -660,6 +951,11 @@ function saveBookDetails() {
         book.currentPage = parseInt(currentPageInput.value) || 0;
     }
     
+    // Get genres, tags and collections
+    book.genres = [...currentModalGenres];
+    book.tags = [...currentModalTags];
+    book.collections = [...currentModalCollections];
+    
     // Get text values
     const summaryEl = document.getElementById('modalSummary');
     const learningsEl = document.getElementById('modalLearnings');
@@ -672,6 +968,7 @@ function saveBookDetails() {
     displayBooks();
     updateStats();
     updateHomePage();
+    renderCollectionsGrid();
     
     showMessage('✅ Livre mis à jour !', 'success');
     closeBookModal();
@@ -738,6 +1035,51 @@ function initBookModal() {
             stars.forEach((s, i) => {
                 s.textContent = i < currentRating ? '★' : '☆';
             });
+        });
+    }
+    
+    // Genre input
+    const genreInput = document.getElementById('modalGenreInput');
+    if (genreInput) {
+        genreInput.addEventListener('focus', () => {
+            showGenreSuggestions(genreInput.value);
+        });
+        genreInput.addEventListener('input', (e) => {
+            showGenreSuggestions(e.target.value);
+        });
+        genreInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const value = e.target.value.trim();
+                if (value) {
+                    addModalGenre(value.charAt(0).toUpperCase() + value.slice(1));
+                }
+            }
+        });
+        genreInput.addEventListener('blur', () => {
+            // Delay to allow click on suggestion
+            setTimeout(() => hideSuggestions('genreSuggestions'), 200);
+        });
+    }
+    
+    // Tag input
+    const tagInput = document.getElementById('modalTagInput');
+    if (tagInput) {
+        tagInput.addEventListener('input', (e) => {
+            showTagSuggestions(e.target.value);
+        });
+        tagInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const value = e.target.value.trim();
+                if (value) {
+                    addModalTag(value);
+                }
+            }
+        });
+        tagInput.addEventListener('blur', () => {
+            // Delay to allow click on suggestion
+            setTimeout(() => hideSuggestions('tagSuggestions'), 200);
         });
     }
     
@@ -860,6 +1202,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize book modal
     initBookModal();
+    
+    // Initialize add book genres
+    initAddBookGenres();
+    
+    // Initialize collections
+    initCollections();
 });
 
 // Gérer l'affichage conditionnel des champs selon le statut
@@ -879,4 +1227,503 @@ function toggleReadOnlyFields() {
     }
     summaryGroup.style.display = isRead ? 'block' : 'none';
     learningsGroup.style.display = isRead ? 'block' : 'none';
+}
+
+// ========================================
+// COLLECTIONS MANAGEMENT
+// ========================================
+
+let currentModalCollections = [];
+let selectedCollectionIcon = '📚';
+
+function renderCollectionsGrid() {
+    const grid = document.getElementById('collectionsGrid');
+    if (!grid) return;
+    
+    if (libraryCollections.length === 0) {
+        grid.innerHTML = '<div class="collections-empty">Aucune collection. Créez-en une !</div>';
+        return;
+    }
+    
+    grid.innerHTML = libraryCollections.map(collection => {
+        const bookCount = books.filter(b => b.collections && b.collections.includes(collection.name)).length;
+        return `
+            <div class="collection-card" onclick="openCollectionView('${collection.name}')">
+                <button class="collection-delete" onclick="event.stopPropagation(); deleteCollection(${collection.id})" title="Supprimer">×</button>
+                <div class="collection-icon">${collection.icon}</div>
+                <div class="collection-name">${collection.name}</div>
+                <div class="collection-count">${bookCount} livre${bookCount > 1 ? 's' : ''}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderModalCollections() {
+    const container = document.getElementById('modalCollections');
+    if (!container) return;
+    
+    if (libraryCollections.length === 0) {
+        container.innerHTML = '<div class="collections-empty">Aucune collection créée</div>';
+        return;
+    }
+    
+    container.innerHTML = libraryCollections.map(collection => {
+        const isChecked = currentModalCollections.includes(collection.name);
+        return `
+            <div class="collection-checkbox ${isChecked ? 'checked' : ''}" onclick="toggleModalCollection('${collection.name}')">
+                <span class="collection-checkbox-icon">${collection.icon}</span>
+                <span class="collection-checkbox-name">${collection.name}</span>
+                <span class="collection-checkbox-check">${isChecked ? '✓' : ''}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function toggleModalCollection(collectionName) {
+    if (currentModalCollections.includes(collectionName)) {
+        currentModalCollections = currentModalCollections.filter(c => c !== collectionName);
+    } else {
+        currentModalCollections.push(collectionName);
+    }
+    renderModalCollections();
+}
+
+function openCreateCollectionModal() {
+    const modal = document.getElementById('createCollectionModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        selectedCollectionIcon = '📚';
+        const nameInput = document.getElementById('newCollectionName');
+        if (nameInput) {
+            nameInput.value = '';
+            nameInput.focus();
+        }
+        // Reset icon selection
+        const iconBtns = modal.querySelectorAll('.collection-icon-btn');
+        iconBtns.forEach(btn => btn.classList.remove('active'));
+        const firstBtn = modal.querySelector('.collection-icon-btn[data-icon="📚"]');
+        if (firstBtn) firstBtn.classList.add('active');
+    }
+}
+
+function closeCreateCollectionModal() {
+    const modal = document.getElementById('createCollectionModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function createNewCollection() {
+    const nameInput = document.getElementById('newCollectionName');
+    if (!nameInput) return;
+    
+    const name = nameInput.value.trim();
+    if (!name) {
+        showMessage('⚠️ Veuillez entrer un nom pour la collection', 'warning');
+        return;
+    }
+    
+    if (libraryCollections.find(c => c.name.toLowerCase() === name.toLowerCase())) {
+        showMessage('⚠️ Une collection avec ce nom existe déjà', 'warning');
+        return;
+    }
+    
+    const success = addCollection(name, selectedCollectionIcon);
+    if (success) {
+        showMessage(`✅ Collection "${name}" créée !`, 'success');
+        closeCreateCollectionModal();
+        renderCollectionsGrid();
+        renderModalCollections();
+    }
+}
+
+function deleteCollection(collectionId) {
+    const collection = libraryCollections.find(c => c.id === collectionId);
+    if (!collection) return;
+    
+    if (!confirm(`Supprimer la collection "${collection.name}" ?`)) return;
+    
+    // Remove collection from all books
+    books.forEach(book => {
+        if (book.collections) {
+            book.collections = book.collections.filter(c => c !== collection.name);
+        }
+    });
+    saveBooks();
+    
+    // Remove collection from library
+    libraryCollections = libraryCollections.filter(c => c.id !== collectionId);
+    saveCollections();
+    
+    showMessage(`🗑️ Collection "${collection.name}" supprimée`, 'info');
+    renderCollectionsGrid();
+}
+
+function openCollectionView(collectionName) {
+    // Navigate to library first
+    navigateTo('library');
+    
+    // Apply collection filter after navigation
+    setTimeout(() => {
+        activeFilters.collection = collectionName;
+        updateDropdownLabel('collections', collectionName);
+        populateCollectionsFilter();
+        applyFilters();
+    }, 100);
+}
+
+function clearCollectionFilter() {
+    clearAllFilters();
+}
+
+// ==========================================
+// SYSTÈME DE FILTRAGE AVANCÉ
+// ==========================================
+
+function applyFilters() {
+    let result = [...books];
+    
+    // Filtre par statut
+    if (activeFilters.status) {
+        result = result.filter(b => b.status === activeFilters.status);
+    }
+    
+    // Filtre par genre
+    if (activeFilters.genre) {
+        result = result.filter(b => b.genres && b.genres.includes(activeFilters.genre));
+    }
+    
+    // Filtre par collection
+    if (activeFilters.collection) {
+        result = result.filter(b => b.collections && b.collections.includes(activeFilters.collection));
+    }
+    
+    // Filtre par tag
+    if (activeFilters.tag) {
+        const tagQuery = activeFilters.tag.toLowerCase();
+        result = result.filter(b => b.tags && b.tags.some(t => t.toLowerCase().includes(tagQuery)));
+    }
+    
+    // Filtre par recherche textuelle
+    if (activeFilters.search) {
+        const query = activeFilters.search.toLowerCase();
+        result = result.filter(b => 
+            b.title.toLowerCase().includes(query) || 
+            b.author.toLowerCase().includes(query)
+        );
+    }
+    
+    filteredBooks = result;
+    displayBooks();
+    updateActiveFilterBanner();
+}
+
+function updateActiveFilterBanner() {
+    const banner = document.getElementById('activeFilterBanner');
+    const filterIcon = document.getElementById('activeFilterIcon');
+    const filterName = document.getElementById('activeFilterName');
+    const filterCount = document.getElementById('activeFilterCount');
+    
+    if (!banner) return;
+    
+    // Construire le texte des filtres actifs
+    const activeFilterTexts = [];
+    let mainIcon = '🔍';
+    
+    if (activeFilters.collection) {
+        const col = libraryCollections.find(c => c.name === activeFilters.collection);
+        mainIcon = col ? col.icon : '📚';
+        activeFilterTexts.push(activeFilters.collection);
+    }
+    if (activeFilters.genre) {
+        if (activeFilterTexts.length === 0) mainIcon = '📖';
+        activeFilterTexts.push(activeFilters.genre);
+    }
+    if (activeFilters.tag) {
+        if (activeFilterTexts.length === 0) mainIcon = '🏷️';
+        activeFilterTexts.push(`#${activeFilters.tag}`);
+    }
+    if (activeFilters.status) {
+        const statusLabels = { 'to-read': 'À lire', 'reading': 'En cours', 'read': 'Lus' };
+        if (activeFilterTexts.length === 0) mainIcon = '📊';
+        activeFilterTexts.push(statusLabels[activeFilters.status]);
+    }
+    
+    if (activeFilterTexts.length > 0) {
+        banner.style.display = 'flex';
+        if (filterIcon) filterIcon.textContent = mainIcon;
+        if (filterName) filterName.textContent = activeFilterTexts.join(' • ');
+        if (filterCount) filterCount.textContent = `${filteredBooks.length} livre${filteredBooks.length > 1 ? 's' : ''}`;
+    } else {
+        banner.style.display = 'none';
+    }
+    
+    // Mettre à jour le compteur principal aussi
+    const libraryCount = document.getElementById('libraryCount');
+    if (libraryCount) {
+        if (activeFilterTexts.length > 0) {
+            libraryCount.textContent = `${filteredBooks.length} livre${filteredBooks.length > 1 ? 's' : ''} (filtré)`;
+        } else {
+            libraryCount.textContent = `${books.length} livre${books.length > 1 ? 's' : ''}`;
+        }
+    }
+}
+
+function clearActiveFilter() {
+    clearAllFilters();
+}
+
+function clearAllFilters() {
+    activeFilters = {
+        status: '',
+        genre: '',
+        collection: '',
+        tag: '',
+        search: ''
+    };
+    
+    // Reset UI controls
+    const searchBooks = document.getElementById('searchBooks');
+    const statusChips = document.querySelectorAll('.status-chip');
+    
+    if (searchBooks) searchBooks.value = '';
+    
+    statusChips.forEach(chip => {
+        if (chip.dataset.status === '') {
+            chip.classList.add('active');
+        } else {
+            chip.classList.remove('active');
+        }
+    });
+    
+    // Reset dropdown labels
+    updateDropdownLabel('collections', 'Collections');
+    updateDropdownLabel('genres', 'Genres');
+    updateDropdownLabel('tags', 'Tags');
+    
+    // Refresh filter lists
+    populateCollectionsFilter();
+    populateGenresFilter();
+    populateTagsFilter();
+    
+    filteredBooks = [...books];
+    displayBooks();
+    updateActiveFilterBanner();
+}
+
+function initAdvancedFilters() {
+    // Initialiser les dropdowns de filtres
+    initFilterDropdown('collections');
+    initFilterDropdown('genres');
+    initFilterDropdown('tags');
+    
+    // Remplir les listes
+    populateCollectionsFilter();
+    populateGenresFilter();
+    populateTagsFilter();
+    
+    // Fermer les dropdowns quand on clique ailleurs
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.filter-dropdown')) {
+            document.querySelectorAll('.filter-dropdown-menu').forEach(menu => {
+                menu.classList.remove('open');
+            });
+        }
+    });
+}
+
+function initFilterDropdown(type) {
+    const btn = document.getElementById(`${type}FilterBtn`);
+    const menu = document.getElementById(`${type}FilterMenu`);
+    
+    if (btn && menu) {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Fermer les autres menus
+            document.querySelectorAll('.filter-dropdown-menu').forEach(m => {
+                if (m !== menu) m.classList.remove('open');
+            });
+            menu.classList.toggle('open');
+        });
+    }
+}
+
+function populateCollectionsFilter() {
+    const list = document.getElementById('collectionsFilterList');
+    if (!list) return;
+    
+    list.innerHTML = `
+        <div class="filter-option ${!activeFilters.collection ? 'active' : ''}" 
+             onclick="setCollectionFilter('')">
+            Toutes les collections
+        </div>
+    `;
+    
+    libraryCollections.forEach(col => {
+        const isActive = activeFilters.collection === col.name;
+        list.innerHTML += `
+            <div class="filter-option ${isActive ? 'active' : ''}" 
+                 onclick="setCollectionFilter('${col.name}')">
+                ${col.icon} ${col.name}
+            </div>
+        `;
+    });
+}
+
+function setCollectionFilter(collectionName) {
+    activeFilters.collection = collectionName;
+    populateCollectionsFilter();
+    closeFilterMenus();
+    updateDropdownLabel('collections', collectionName || 'Collections');
+    applyFilters();
+}
+
+function populateGenresFilter() {
+    const list = document.getElementById('genresFilterList');
+    if (!list) return;
+    
+    list.innerHTML = `
+        <div class="filter-option ${!activeFilters.genre ? 'active' : ''}" 
+             onclick="setGenreFilter('')">
+            Tous les genres
+        </div>
+    `;
+    
+    libraryGenres.forEach(genre => {
+        const isActive = activeFilters.genre === genre;
+        list.innerHTML += `
+            <div class="filter-option ${isActive ? 'active' : ''}" 
+                 onclick="setGenreFilter('${genre}')">
+                ${genre}
+            </div>
+        `;
+    });
+}
+
+function setGenreFilter(genre) {
+    activeFilters.genre = genre;
+    populateGenresFilter();
+    closeFilterMenus();
+    updateDropdownLabel('genres', genre || 'Genres');
+    applyFilters();
+}
+
+function populateTagsFilter() {
+    const list = document.getElementById('tagsFilterList');
+    if (!list) return;
+    
+    // Collecter tous les tags uniques des livres
+    const allTags = new Set();
+    books.forEach(book => {
+        if (book.tags) {
+            book.tags.forEach(tag => allTags.add(tag));
+        }
+    });
+    
+    list.innerHTML = `
+        <div class="filter-option ${!activeFilters.tag ? 'active' : ''}" 
+             onclick="setTagFilter('')">
+            Tous les tags
+        </div>
+    `;
+    
+    Array.from(allTags).sort().forEach(tag => {
+        const isActive = activeFilters.tag === tag;
+        list.innerHTML += `
+            <div class="filter-option ${isActive ? 'active' : ''}" 
+                 onclick="setTagFilter('${tag}')">
+                #${tag}
+            </div>
+        `;
+    });
+    
+    if (allTags.size === 0) {
+        list.innerHTML += `
+            <div class="filter-option disabled">
+                <em>Aucun tag défini</em>
+            </div>
+        `;
+    }
+}
+
+function setTagFilter(tag) {
+    activeFilters.tag = tag;
+    populateTagsFilter();
+    closeFilterMenus();
+    updateDropdownLabel('tags', tag ? `#${tag}` : 'Tags');
+    applyFilters();
+}
+
+function updateDropdownLabel(type, label) {
+    const btn = document.getElementById(`${type}FilterBtn`);
+    if (btn) {
+        const labelSpan = btn.querySelector('.dropdown-label');
+        if (labelSpan) {
+            labelSpan.textContent = label;
+        }
+    }
+}
+
+function closeFilterMenus() {
+    document.querySelectorAll('.filter-dropdown-menu').forEach(menu => {
+        menu.classList.remove('open');
+    });
+}
+
+function updateCollectionFilter() {
+    populateCollectionsFilter();
+}
+
+function initCollections() {
+    // Add collection button
+    const addBtn = document.getElementById('addCollectionBtn');
+    if (addBtn) {
+        addBtn.addEventListener('click', openCreateCollectionModal);
+    }
+    
+    // Create collection modal buttons
+    const cancelBtn = document.getElementById('cancelCollectionBtn');
+    const confirmBtn = document.getElementById('confirmCollectionBtn');
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeCreateCollectionModal);
+    }
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', createNewCollection);
+    }
+    
+    // Icon selection
+    const modal = document.getElementById('createCollectionModal');
+    if (modal) {
+        const iconBtns = modal.querySelectorAll('.collection-icon-btn');
+        iconBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                iconBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedCollectionIcon = btn.dataset.icon;
+            });
+        });
+        
+        // Close on outside click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeCreateCollectionModal();
+            }
+        });
+    }
+    
+    // Enter key to create
+    const nameInput = document.getElementById('newCollectionName');
+    if (nameInput) {
+        nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                createNewCollection();
+            }
+        });
+    }
+    
+    // Initial render - utilise setTimeout pour s'assurer que loadBooks() a déjà chargé les collections
+    setTimeout(() => {
+        renderCollectionsGrid();
+    }, 50);
 }

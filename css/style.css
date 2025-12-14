@@ -531,36 +531,6 @@ body {
     }
 }
 
-.search-input-wrapper {
-    position: relative;
-    margin-bottom: 16px;
-}
-
-.search-input-wrapper .search-icon {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.2rem;
-    pointer-events: none;
-}
-
-.search-input-wrapper input {
-    width: 100%;
-    padding: 14px 16px 14px 48px;
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
-    font-size: 16px;
-    transition: all 0.2s ease;
-    background: white;
-}
-
-.search-input-wrapper input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
 .status-filter-chips {
     display: flex;
     gap: 8px;
@@ -1746,6 +1716,257 @@ body {
     background: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
+}
+
+/* Bannière de filtre actif */
+.active-filter-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: linear-gradient(135deg, var(--primary-color), #1e40af);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.active-filter-banner .filter-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.active-filter-banner .filter-icon {
+    font-size: 1.5rem;
+}
+
+.active-filter-banner .filter-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.active-filter-banner .filter-count {
+    opacity: 0.85;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.btn-clear-filter-large {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-clear-filter-large:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* Filtres avancés de la bibliothèque */
+.library-filters-advanced {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border-color);
+}
+
+.filter-row {
+    margin-bottom: 16px;
+}
+
+.filter-row:last-child {
+    margin-bottom: 0;
+}
+
+.search-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0 16px;
+    transition: all 0.2s;
+    height: 48px;
+}
+
+.search-input-wrapper:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.search-input-wrapper .search-icon-svg {
+    flex-shrink: 0;
+    margin-right: 12px;
+    color: #9ca3af;
+}
+
+.search-input-wrapper input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-size: 1rem;
+    outline: none;
+    height: 100%;
+    color: var(--text-primary);
+}
+
+.search-input-wrapper input::placeholder {
+    color: #9ca3af;
+}
+
+/* Version large pour la page Rechercher */
+.search-input-large-wrapper {
+    flex: 1;
+    height: 52px;
+    border-radius: 12px;
+    background: white;
+}
+
+.search-input-large-wrapper .search-icon-svg {
+    width: 22px;
+    height: 22px;
+}
+
+.search-input-large-wrapper input {
+    font-size: 1.1rem;
+}
+
+/* Filter dropdowns */
+.filter-dropdowns {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filter-dropdown {
+    position: relative;
+}
+
+.filter-dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    transition: all 0.2s;
+    min-width: 140px;
+}
+
+.filter-dropdown-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.filter-dropdown-btn .dropdown-icon {
+    font-size: 1.1rem;
+}
+
+.filter-dropdown-btn .dropdown-label {
+    flex: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.filter-dropdown-btn .dropdown-arrow {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    transition: transform 0.2s;
+}
+
+.filter-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 220px;
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s;
+}
+
+.filter-dropdown-menu.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-menu-content {
+    padding: 8px;
+}
+
+.filter-option {
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 0.9rem;
+}
+
+.filter-option:hover {
+    background: var(--light-bg);
+}
+
+.filter-option.active {
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.filter-option.disabled {
+    color: var(--text-secondary);
+    cursor: default;
+    font-style: italic;
+}
+
+.filter-option.disabled:hover {
+    background: transparent;
+}
+
+/* Séparateur entre filtres avancés et chips de statut */
+.filters-separator {
+    height: 1px;
+    background: var(--border-color);
+    margin: 16px 0;
 }
 
 .search-results {
@@ -3349,4 +3570,417 @@ body {
         flex-direction: row;
         justify-content: center;
     }
+}
+
+/* ========================================
+   CHIPS - GENRES & TAGS
+======================================== */
+
+.modal-genres-container,
+.modal-tags-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 36px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.chip-genre {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+    color: #7c3aed;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.chip-tag {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);
+    color: #2563eb;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.chip-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.1);
+    color: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    padding: 0;
+    line-height: 1;
+}
+
+.chip-remove:hover {
+    background: rgba(220, 38, 38, 0.2);
+    color: #dc2626;
+}
+
+.modal-chip-input-wrapper {
+    position: relative;
+}
+
+.modal-chip-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.modal-chip-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.chip-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+    margin-top: 4px;
+}
+
+.chip-suggestions.active {
+    display: block;
+}
+
+.chip-suggestion {
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chip-suggestion:hover,
+.chip-suggestion.selected {
+    background: var(--light-bg);
+}
+
+.chip-suggestion:first-child {
+    border-radius: 10px 10px 0 0;
+}
+
+.chip-suggestion:last-child {
+    border-radius: 0 0 10px 10px;
+}
+
+.chip-suggestion-new {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.chip-suggestion-new::before {
+    content: '+ ';
+}
+
+/* Empty state for chips */
+.chips-empty {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-style: italic;
+    padding: 4px 0;
+}
+
+/* Mini genre chips on book cards */
+.book-genres-mini {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 6px 0;
+}
+
+.genre-chip-mini {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(139, 92, 246, 0.1);
+    color: #7c3aed;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.genre-chip-mini.more {
+    background: rgba(100, 116, 139, 0.1);
+    color: #64748b;
+}
+
+/* ========================================
+   COLLECTIONS
+======================================== */
+
+.section-header-with-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.section-header-with-action .section-title-public {
+    margin: 0;
+}
+
+.btn-add-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px dashed var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-add-small:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.collection-card {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.collection-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.1);
+    transform: translateY(-2px);
+}
+
+.collection-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.collection-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.collection-count {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.collection-delete {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+    font-size: 0.7rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.collection-card:hover .collection-delete {
+    opacity: 1;
+}
+
+.collection-delete:hover {
+    background: #dc2626;
+    color: white;
+}
+
+/* Create Collection Modal */
+.create-collection-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 2100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.create-collection-content {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.create-collection-content h3 {
+    margin: 0 0 20px 0;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.collection-icons-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.collection-icon-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.collection-icon-btn:hover {
+    border-color: var(--primary-color);
+}
+
+.collection-icon-btn.active {
+    border-color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.1);
+}
+
+/* Modal Collections Checkboxes */
+.modal-collections-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.collection-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.collection-checkbox:hover {
+    border-color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.02);
+}
+
+.collection-checkbox.checked {
+    border-color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.collection-checkbox-icon {
+    font-size: 1.2rem;
+}
+
+.collection-checkbox-name {
+    flex: 1;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.collection-checkbox-check {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+
+.collection-checkbox.checked .collection-checkbox-check {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.collections-empty {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Clear filter button */
+.btn-clear-filter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-left: 8px;
+    border: none;
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    vertical-align: middle;
+}
+
+.btn-clear-filter:hover {
+    background: #dc2626;
+    color: white;
 }
