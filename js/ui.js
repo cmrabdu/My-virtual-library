@@ -90,7 +90,14 @@ function displayBooks() {
 
     filteredBooks.forEach(book => {
         const bookCard = document.createElement('div');
-        bookCard.className = 'book-card';
+        bookCard.className = 'book-card clickable';
+        bookCard.setAttribute('role', 'button');
+        bookCard.setAttribute('tabindex', '0');
+        bookCard.onclick = (e) => {
+            // Don't open modal if clicking on interactive elements
+            if (e.target.closest('.delete-btn') || e.target.closest('.status-badge') || e.target.closest('.interactive-stars')) return;
+            openBookModal(book.id);
+        };
         bookCard.innerHTML = `
             <div class="book-cover-wrapper">
                 ${renderBookCover(book)}
@@ -100,10 +107,10 @@ function displayBooks() {
                 <h3>${book.title}</h3>
                 <p class="book-author">${book.author}</p>
                 ${book.isbn ? `<p class="book-isbn">ISBN: ${book.isbn}</p>` : ''}
-                <div class="book-status" style="cursor: pointer;" onclick="editBookStatus(${book.id})" title="Cliquer pour changer le statut">
+                <div class="book-status" style="cursor: pointer;" onclick="event.stopPropagation(); editBookStatus(${book.id})" title="Cliquer pour changer le statut">
                     <span class="status-badge status-${book.status}">${getStatusLabel(book.status)}</span>
                 </div>
-                <div class="book-rating" style="margin: 8px 0;">
+                <div class="book-rating" style="margin: 8px 0;" onclick="event.stopPropagation();">
                     <div class="stars interactive-stars" data-book-id="${book.id}">
                         ${renderInteractiveStars(book.rating, book.id)}
                     </div>
@@ -112,8 +119,7 @@ function displayBooks() {
                 ${book.pages ? renderProgressBar(book) : ''}
                 ${book.summary ? `<p class="book-summary" style="font-size: 0.85rem; color: #64748b; margin: 8px 0; line-height: 1.4;">${book.summary.substring(0, 100)}${book.summary.length > 100 ? '...' : ''}</p>` : ''}
                 <div class="book-actions">
-                    <button class="view-btn" onclick="viewBookDetails(${book.id})">👁️ Détails</button>
-                    <button class="delete-btn" onclick="deleteBook(${book.id})">🗑️</button>
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteBook(${book.id})" title="Supprimer le livre">🗑️</button>
                 </div>
             </div>
         `;
@@ -465,22 +471,300 @@ function editBookRating(bookId) {
 }
 
 function viewBookDetails(bookId) {
+    openBookModal(bookId);
+}
+
+// ========================================
+// BOOK MODAL MANAGEMENT
+// ========================================
+
+let currentModalBookId = null;
+
+function openBookModal(bookId) {
     const book = books.find(b => b.id === bookId);
     if (!book) return;
+    
+    currentModalBookId = bookId;
+    const modal = document.getElementById('bookModalOverlay');
+    if (!modal) return;
+    
+    // Populate modal with book data
+    const coverEl = document.getElementById('modalCover');
+    const titleEl = document.getElementById('modalTitle');
+    const authorEl = document.getElementById('modalAuthor');
+    const pagesEl = document.getElementById('modalPages');
+    const isbnEl = document.getElementById('modalIsbn');
+    const statusBadge = document.getElementById('modalStatus');
+    const summaryEl = document.getElementById('modalSummary');
+    const learningsEl = document.getElementById('modalLearnings');
+    const dateEl = document.getElementById('modalDate');
+    const progressSection = document.getElementById('modalProgressSection');
+    const progressFill = document.getElementById('modalProgressFill');
+    const currentPageInput = document.getElementById('modalCurrentPage');
+    const totalPagesEl = document.getElementById('modalTotalPages');
+    
+    // Set cover image with fallback
+    if (coverEl) {
+        const coverUrl = book.cover || 'https://via.placeholder.com/180x270?text=Livre';
+        coverEl.style.backgroundImage = `url('${coverUrl}')`;
+        coverEl.style.backgroundSize = 'cover';
+        coverEl.style.backgroundPosition = 'center';
+    }
+    
+    // Set basic info
+    if (titleEl) titleEl.textContent = book.title;
+    if (authorEl) authorEl.textContent = book.author;
+    if (pagesEl) pagesEl.textContent = book.pages ? `${book.pages} pages` : '';
+    if (isbnEl) isbnEl.textContent = book.isbn ? `ISBN: ${book.isbn}` : '';
+    if (dateEl) dateEl.textContent = `Ajouté le ${book.addedDate}`;
+    
+    // Set status badge
+    if (statusBadge) {
+        statusBadge.className = `modal-status-badge status-${book.status}`;
+        statusBadge.textContent = getStatusLabel(book.status);
+    }
+    
+    // Set status selector
+    const statusBtns = modal.querySelectorAll('.modal-status-option');
+    statusBtns.forEach(btn => {
+        const status = btn.dataset.status;
+        btn.classList.toggle('active', status === book.status);
+    });
+    
+    // Set rating
+    setModalRating(book.rating || 0);
+    
+    // Set progress section (only for books with pages)
+    if (progressSection) {
+        if (book.pages && book.status === 'reading') {
+            progressSection.style.display = 'block';
+            const currentPage = book.currentPage || 0;
+            const totalPages = parseInt(book.pages) || 1;
+            const percent = Math.round((currentPage / totalPages) * 100);
+            
+            if (progressFill) progressFill.style.width = `${percent}%`;
+            if (currentPageInput) currentPageInput.value = currentPage;
+            if (totalPagesEl) totalPagesEl.textContent = `/ ${totalPages}`;
+        } else {
+            progressSection.style.display = 'none';
+        }
+    }
+    
+    // Set text areas
+    if (summaryEl) summaryEl.value = book.summary || '';
+    if (learningsEl) learningsEl.value = book.learnings || '';
+    
+    // Show modal with animation
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('active'), 10);
+    document.body.style.overflow = 'hidden';
+}
 
-    const details = `
-📖 ${book.title}
-✍️ ${book.author}
-${book.isbn ? `📌 ISBN: ${book.isbn}` : ''}
-${book.pages ? `📄 Pages: ${book.pages}` : ''}
-📊 ${getStatusLabel(book.status)}
-⭐ ${book.rating > 0 ? book.rating + '/5' : 'Non noté'}
-📅 Ajouté le ${book.addedDate}
-${book.summary ? `\n📝 Résumé:\n${book.summary}` : ''}
-${book.learnings ? `\n💡 Apprentissages:\n${book.learnings}` : ''}
-    `.trim();
+function closeBookModal() {
+    const modal = document.getElementById('bookModalOverlay');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+        document.body.style.overflow = '';
+        currentModalBookId = null;
+    }
+}
 
-    alert(details);
+function setModalRating(rating) {
+    const starsContainer = document.getElementById('modalRating');
+    if (!starsContainer) return;
+    
+    const stars = starsContainer.querySelectorAll('.modal-star');
+    stars.forEach((star, index) => {
+        star.classList.toggle('active', index < rating);
+        star.textContent = index < rating ? '★' : '☆';
+    });
+    
+    // Store current rating
+    starsContainer.dataset.rating = rating;
+}
+
+function handleModalStarClick(starIndex) {
+    setModalRating(starIndex + 1);
+}
+
+function handleModalStatusClick(btn) {
+    const modal = document.getElementById('bookModalOverlay');
+    if (!modal) return;
+    
+    const statusBtns = modal.querySelectorAll('.modal-status-option');
+    statusBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Update progress section visibility
+    const status = btn.dataset.status;
+    const progressSection = document.getElementById('modalProgressSection');
+    const book = books.find(b => b.id === currentModalBookId);
+    
+    if (progressSection && book) {
+        progressSection.style.display = (status === 'reading' && book.pages) ? 'block' : 'none';
+    }
+}
+
+function updateModalProgress() {
+    if (!currentModalBookId) return;
+    
+    const book = books.find(b => b.id === currentModalBookId);
+    if (!book) return;
+    
+    const currentPageInput = document.getElementById('modalCurrentPage');
+    const progressFill = document.getElementById('modalProgressFill');
+    
+    if (currentPageInput) {
+        const currentPage = parseInt(currentPageInput.value) || 0;
+        const totalPages = parseInt(book.pages) || 1;
+        const validPage = Math.max(0, Math.min(currentPage, totalPages));
+        
+        book.currentPage = validPage;
+        currentPageInput.value = validPage;
+        
+        const percent = Math.round((validPage / totalPages) * 100);
+        if (progressFill) progressFill.style.width = `${percent}%`;
+        
+        saveBooks();
+        showMessage(`📖 Progression: ${validPage}/${totalPages} pages (${percent}%)`, 'success');
+    }
+}
+
+function saveBookDetails() {
+    if (!currentModalBookId) return;
+    
+    const book = books.find(b => b.id === currentModalBookId);
+    if (!book) return;
+    
+    const modal = document.getElementById('bookModalOverlay');
+    if (!modal) return;
+    
+    // Get status
+    const activeStatusBtn = modal.querySelector('.modal-status-option.active');
+    if (activeStatusBtn) {
+        book.status = activeStatusBtn.dataset.status;
+    }
+    
+    // Get rating
+    const starsContainer = document.getElementById('modalRating');
+    if (starsContainer) {
+        book.rating = parseInt(starsContainer.dataset.rating) || 0;
+    }
+    
+    // Get progress
+    const currentPageInput = document.getElementById('modalCurrentPage');
+    if (currentPageInput && book.pages) {
+        book.currentPage = parseInt(currentPageInput.value) || 0;
+    }
+    
+    // Get text values
+    const summaryEl = document.getElementById('modalSummary');
+    const learningsEl = document.getElementById('modalLearnings');
+    
+    if (summaryEl) book.summary = summaryEl.value.trim();
+    if (learningsEl) book.learnings = learningsEl.value.trim();
+    
+    // Save and update
+    saveBooks();
+    displayBooks();
+    updateStats();
+    updateHomePage();
+    
+    showMessage('✅ Livre mis à jour !', 'success');
+    closeBookModal();
+}
+
+function deleteBookFromModal() {
+    if (!currentModalBookId) return;
+    
+    const book = books.find(b => b.id === currentModalBookId);
+    if (!book) return;
+    
+    if (!confirm(`Supprimer "${book.title}" ?`)) return;
+    
+    books = books.filter(b => b.id !== currentModalBookId);
+    filteredBooks = filteredBooks.filter(b => b.id !== currentModalBookId);
+    saveBooks();
+    displayBooks();
+    updateStats();
+    updateHomePage();
+    
+    showMessage('🗑️ Livre supprimé.', 'info');
+    closeBookModal();
+}
+
+// Initialize modal event listeners
+function initBookModal() {
+    const modal = document.getElementById('bookModalOverlay');
+    if (!modal) return;
+    
+    // Close on overlay click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeBookModal();
+        }
+    });
+    
+    // Close button
+    const closeBtn = document.getElementById('closeBookModal');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeBookModal);
+    }
+    
+    // Status buttons
+    const statusBtns = modal.querySelectorAll('.modal-status-option');
+    statusBtns.forEach(btn => {
+        btn.addEventListener('click', () => handleModalStatusClick(btn));
+    });
+    
+    // Rating stars
+    const starsContainer = document.getElementById('modalRating');
+    if (starsContainer) {
+        const stars = starsContainer.querySelectorAll('.modal-star');
+        stars.forEach((star, index) => {
+            star.addEventListener('click', () => handleModalStarClick(index));
+            star.addEventListener('mouseenter', () => {
+                stars.forEach((s, i) => {
+                    s.textContent = i <= index ? '★' : '☆';
+                });
+            });
+        });
+        
+        starsContainer.addEventListener('mouseleave', () => {
+            const currentRating = parseInt(starsContainer.dataset.rating) || 0;
+            stars.forEach((s, i) => {
+                s.textContent = i < currentRating ? '★' : '☆';
+            });
+        });
+    }
+    
+    // Update progress button
+    const updateProgressBtn = document.getElementById('updateProgressBtn');
+    if (updateProgressBtn) {
+        updateProgressBtn.addEventListener('click', updateModalProgress);
+    }
+    
+    // Save button
+    const saveBtn = document.getElementById('saveBookChanges');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveBookDetails);
+    }
+    
+    // Delete button
+    const deleteBtn = document.getElementById('deleteBookModal');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', deleteBookFromModal);
+    }
+    
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeBookModal();
+        }
+    });
 }
 
 function highlightStars(count, stars) {
@@ -573,6 +857,9 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleReadOnlyFields();
         });
     });
+    
+    // Initialize book modal
+    initBookModal();
 });
 
 // Gérer l'affichage conditionnel des champs selon le statut

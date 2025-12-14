@@ -662,8 +662,8 @@
                     </button>
 
                     <div class="about-section">
-                        <p class="version-info">📚 Ma Bibliothèque v0.6.2.0</p>
-                        <p class="version-date">Décembre 2025 • Nouvelle page Statistiques</p>
+                        <p class="version-info">📚 Ma Bibliothèque v0.6.4.0</p>
+                        <p class="version-date">Décembre 2025 • Book details modal</p>
                     </div>
                 </div>
             </div>
@@ -730,6 +730,93 @@
             </button>
         </nav>
 
+    </div>
+
+    <!-- Modal Détails du Livre -->
+    <div class="book-modal-overlay" id="bookModalOverlay" style="display: none;">
+        <div class="book-modal">
+            <button class="modal-close" id="closeBookModal">✕</button>
+            
+            <div class="modal-header">
+                <div class="modal-cover" id="modalCover"></div>
+                <div class="modal-title-section">
+                    <h2 class="modal-title" id="modalTitle">Titre du livre</h2>
+                    <p class="modal-author" id="modalAuthor">Auteur</p>
+                    <div class="modal-meta">
+                        <span class="modal-pages" id="modalPages">0 pages</span>
+                        <span class="modal-isbn" id="modalIsbn"></span>
+                    </div>
+                    <div class="modal-status-badge" id="modalStatus"></div>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <!-- Progression -->
+                <div class="modal-section" id="modalProgressSection">
+                    <h3>📖 Progression</h3>
+                    <div class="modal-progress-container">
+                        <div class="modal-progress-bar">
+                            <div class="modal-progress-fill" id="modalProgressFill"></div>
+                        </div>
+                        <div class="modal-progress-input">
+                            <input type="number" id="modalCurrentPage" min="0" placeholder="Page actuelle">
+                            <span id="modalTotalPages">/ 0</span>
+                        </div>
+                        <button class="btn btn-small btn-secondary" id="updateProgressBtn">Mettre à jour</button>
+                    </div>
+                </div>
+
+                <!-- Note -->
+                <div class="modal-section">
+                    <h3>⭐ Note</h3>
+                    <div class="modal-rating" id="modalRating">
+                        <span class="modal-star" data-rating="1">☆</span>
+                        <span class="modal-star" data-rating="2">☆</span>
+                        <span class="modal-star" data-rating="3">☆</span>
+                        <span class="modal-star" data-rating="4">☆</span>
+                        <span class="modal-star" data-rating="5">☆</span>
+                    </div>
+                </div>
+
+                <!-- Statut -->
+                <div class="modal-section">
+                    <h3>📚 Statut</h3>
+                    <div class="modal-status-selector">
+                        <button class="modal-status-option" data-status="to-read">
+                            <span>📚</span> À lire
+                        </button>
+                        <button class="modal-status-option" data-status="reading">
+                            <span>📖</span> En cours
+                        </button>
+                        <button class="modal-status-option" data-status="read">
+                            <span>✅</span> Lu
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Résumé -->
+                <div class="modal-section">
+                    <h3>📝 Résumé</h3>
+                    <textarea class="modal-textarea" id="modalSummary" placeholder="Ajoutez un résumé..."></textarea>
+                </div>
+
+                <!-- Apprentissages -->
+                <div class="modal-section">
+                    <h3>💡 Apprentissages</h3>
+                    <textarea class="modal-textarea" id="modalLearnings" placeholder="Ce que vous avez appris de ce livre..."></textarea>
+                </div>
+
+                <!-- Date d'ajout -->
+                <div class="modal-section modal-footer-info">
+                    <span class="modal-date" id="modalDate">Ajouté le ...</span>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="saveBookChanges">💾 Enregistrer</button>
+                <button class="btn btn-danger" id="deleteBookModal">🗑️ Supprimer</button>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts modulaires -->

@@ -347,7 +347,14 @@ function updateProfilePage() {
 
 function createBookCard(book) {
     const card = document.createElement('div');
-    card.className = 'book-card';
+    card.className = 'book-card clickable';
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.onclick = (e) => {
+        // Don't open modal if clicking on interactive elements
+        if (e.target.closest('.status-badge') || e.target.closest('.interactive-stars')) return;
+        openBookModal(book.id);
+    };
     card.innerHTML = `
         <div class="book-cover-wrapper">
             ${renderBookCover(book)}
@@ -357,10 +364,10 @@ function createBookCard(book) {
             <h3>${book.title}</h3>
             <p class="book-author">${book.author}</p>
             ${book.isbn ? `<p class="book-isbn">ISBN: ${book.isbn}</p>` : ''}
-            <div class="book-status" style="cursor: pointer;" onclick="editBookStatus(${book.id})" title="Cliquer pour changer le statut">
+            <div class="book-status" style="cursor: pointer;" onclick="event.stopPropagation(); editBookStatus(${book.id})" title="Cliquer pour changer le statut">
                 <span class="status-badge status-${book.status}">${getStatusLabel(book.status)}</span>
             </div>
-            <div class="book-rating" style="margin: 8px 0;">
+            <div class="book-rating" style="margin: 8px 0;" onclick="event.stopPropagation();">
                 <div class="stars interactive-stars" data-book-id="${book.id}">
                     ${renderInteractiveStars(book.rating, book.id)}
                 </div>

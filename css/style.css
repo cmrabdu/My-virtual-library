@@ -630,6 +630,10 @@ body {
     position: relative;
 }
 
+.book-card.clickable {
+    cursor: pointer;
+}
+
 .book-card:hover {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
@@ -2983,5 +2987,366 @@ body {
     
     .empty-state h3 {
         font-size: 1.2rem;
+    }
+}
+
+/* ========================================
+   MODAL DÉTAILS DU LIVRE
+======================================== */
+
+.book-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.book-modal-overlay.active {
+    opacity: 1;
+}
+
+.book-modal {
+    background: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: rgba(0, 0, 0, 0.2);
+    transform: scale(1.1);
+}
+
+.modal-header {
+    display: flex;
+    gap: 20px;
+    padding: 24px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 20px 20px 0 0;
+}
+
+.modal-cover {
+    width: 100px;
+    height: 150px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.modal-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.modal-cover-text {
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 8px;
+    line-height: 1.3;
+}
+
+.modal-title-section {
+    flex: 1;
+    min-width: 0;
+    padding-top: 8px;
+}
+
+.modal-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 6px 0;
+    line-height: 1.3;
+}
+
+.modal-author {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0 0 12px 0;
+}
+
+.modal-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.modal-status-badge {
+    display: inline-block;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-section {
+    margin-bottom: 24px;
+}
+
+.modal-section h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 12px 0;
+}
+
+/* Progress in modal */
+.modal-progress-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.modal-progress-bar {
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.modal-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    border-radius: 6px;
+    transition: width 0.3s ease;
+}
+
+.modal-progress-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-progress-input input {
+    width: 80px;
+    padding: 8px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.modal-progress-input input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.modal-progress-input span {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Rating in modal */
+.modal-rating {
+    display: flex;
+    gap: 8px;
+}
+
+.modal-star {
+    font-size: 2rem;
+    cursor: pointer;
+    color: #fbbf24;
+    opacity: 0.3;
+    transition: all 0.2s ease;
+}
+
+.modal-star:hover {
+    transform: scale(1.2);
+}
+
+.modal-star.active {
+    opacity: 1;
+}
+
+/* Status selector in modal */
+.modal-status-selector {
+    display: flex;
+    gap: 8px;
+}
+
+.modal-status-option {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.modal-status-option:hover {
+    border-color: var(--primary-color);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.modal-status-option.active {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+    color: var(--primary-color);
+}
+
+.modal-status-option span {
+    font-size: 1.3rem;
+}
+
+/* Textarea in modal */
+.modal-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 14px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.2s ease;
+}
+
+.modal-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.modal-textarea::placeholder {
+    color: #94a3b8;
+}
+
+/* Footer info */
+.modal-footer-info {
+    text-align: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.modal-date {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Modal actions */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    padding: 20px 24px;
+    background: #f8fafc;
+    border-radius: 0 0 20px 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.modal-actions .btn {
+    flex: 1;
+    justify-content: center;
+}
+
+/* Clickable book card */
+.book-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.book-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.book-card:active {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+    .book-modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+    
+    .book-modal {
+        max-width: 100%;
+        max-height: 95vh;
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .modal-header {
+        border-radius: 20px 20px 0 0;
+        padding: 20px;
+        gap: 16px;
+    }
+    
+    .modal-cover {
+        width: 80px;
+        height: 120px;
+    }
+    
+    .modal-title {
+        font-size: 1.1rem;
+    }
+    
+    .modal-status-selector {
+        flex-direction: column;
+    }
+    
+    .modal-status-option {
+        flex-direction: row;
+        justify-content: center;
     }
 }
