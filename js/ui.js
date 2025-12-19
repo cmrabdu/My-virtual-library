@@ -399,17 +399,113 @@ function bindEvents() {
 }
 
 function showMessage(message, type = 'info') {
-    const messageEl = document.createElement('div');
-    messageEl.className = `message message-${type}`;
-    messageEl.textContent = message;
-    messageEl.style.cssText = `
-        position: fixed; top: 20px; right: 20px; padding: 16px 24px;
-        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
-        color: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 10000; font-weight: 500; max-width: 400px;
+    // Supprimer les anciens toasts si trop nombreux
+    const existingToasts = document.querySelectorAll('.toast-notification');
+    if (existingToasts.length >= 3) {
+        existingToasts[0].remove();
+    }
+    
+    // Configuration par type
+    const config = {
+        success: { icon: '✓', bg: 'linear-gradient(135deg, #10b981, #059669)', iconBg: 'rgba(255,255,255,0.2)' },
+        error: { icon: '✕', bg: 'linear-gradient(135deg, #ef4444, #dc2626)', iconBg: 'rgba(255,255,255,0.2)' },
+        warning: { icon: '!', bg: 'linear-gradient(135deg, #f59e0b, #d97706)', iconBg: 'rgba(255,255,255,0.2)' },
+        info: { icon: 'i', bg: 'linear-gradient(135deg, #3b82f6, #2563eb)', iconBg: 'rgba(255,255,255,0.2)' }
+    };
+    
+    const { icon, bg, iconBg } = config[type] || config.info;
+    
+    // Créer le conteneur de toasts s'il n'existe pas
+    let toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        toastContainer.style.cssText = `
+            position: fixed; top: 20px; right: 20px; z-index: 10000;
+            display: flex; flex-direction: column; gap: 12px;
+            pointer-events: none;
+        `;
+        document.body.appendChild(toastContainer);
+    }
+    
+    // Créer le toast
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.style.cssText = `
+        display: flex; align-items: center; gap: 12px;
+        padding: 16px 20px; min-width: 280px; max-width: 400px;
+        background: ${bg}; color: white;
+        border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        pointer-events: auto; cursor: pointer;
+        transform: translateX(120%); opacity: 0;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        overflow: hidden; position: relative;
     `;
-    document.body.appendChild(messageEl);
-    setTimeout(() => messageEl.remove(), 3000);
+    
+    toast.innerHTML = `
+        <div style="
+            width: 32px; height: 32px; border-radius: 50%;
+            background: ${iconBg}; display: flex; align-items: center;
+            justify-content: center; font-weight: bold; font-size: 16px;
+            flex-shrink: 0;
+        ">${icon}</div>
+        <div style="flex: 1; font-weight: 500; font-size: 14px; line-height: 1.4;">
+            ${message}
+        </div>
+        <button style="
+            background: none; border: none; color: white; opacity: 0.7;
+            cursor: pointer; font-size: 18px; padding: 0; margin-left: 8px;
+            transition: opacity 0.2s;
+        " onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'"
+        onclick="this.parentElement.style.transform='translateX(120%)'; this.parentElement.style.opacity='0'; setTimeout(() => this.parentElement.remove(), 300);">×</button>
+        <div style="
+            position: absolute; bottom: 0; left: 0; height: 3px;
+            background: rgba(255,255,255,0.4); width: 100%;
+            animation: toastProgress 3s linear forwards;
+        "></div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Animation d'entrée
+    requestAnimationFrame(() => {
+        toast.style.transform = 'translateX(0)';
+        toast.style.opacity = '1';
+    });
+    
+    // Fermer au clic
+    toast.addEventListener('click', (e) => {
+        if (e.target.tagName !== 'BUTTON') {
+            toast.style.transform = 'translateX(120%)';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }
+    });
+    
+    // Auto-fermeture après 3 secondes
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.style.transform = 'translateX(120%)';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 3000);
+}
+
+// Ajouter les keyframes pour la barre de progression
+if (!document.getElementById('toastStyles')) {
+    const style = document.createElement('style');
+    style.id = 'toastStyles';
+    style.textContent = `
+        @keyframes toastProgress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        .toast-notification:hover div[style*="animation: toastProgress"] {
+            animation-play-state: paused;
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 function resetRating() {
